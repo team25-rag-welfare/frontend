@@ -21,7 +21,7 @@ const KakaoCallback = () => {
                 localStorage.setItem('access_token', access_token);
                 
                 if (is_new_user) {
-                    navigate('/onboarding');
+                    navigate('/terms');   // 신규 회원 → 약관동의 → 온보딩 순서
                 } else {
                     navigate('/chat');
                 }

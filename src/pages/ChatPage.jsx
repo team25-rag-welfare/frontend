@@ -59,6 +59,7 @@ export default function ChatPage() {
   }, [navigate]);
 
 
+
   //ChatWindow에서 입력한 텍스트(inputText)를 인자로 받습니다.
   const handleSendMessage = async (inputText) => {
     if (!inputText.trim()) return;
@@ -97,7 +98,7 @@ export default function ChatPage() {
       }
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, senderType: 'ASSISTANT', content: '앗! 서버랑 연결이 끊어졌어요. 낑낑...' }
+        { id: Date.now() + 1, senderType: 'ASSISTANT', content: '앗! 서버랑 연결이 끊어졌어요.' }
       ]);
     } finally {
       setIsLoading(false);

@@ -105,9 +105,16 @@ export default function ChatPage() {
     }
   };
 
+  const handleLogout = () => {
+    if (window.confirm('진짜로 로그아웃 하시겠습니까?')){
+      localStorage.removeItem('access_token');
+      navigate('/';)
+    }
+  };
+
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      <ChatSidebar isLoggedIn={isLoggedIn} user={user} />
+      <ChatSidebar isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
       
       <ChatWindow 
         isLoggedIn={isLoggedIn} 

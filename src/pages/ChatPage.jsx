@@ -1,23 +1,65 @@
 // src/pages/ChatPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ChatSidebar from '../component/chat/ChatSidebar';
 import ChatWindow from '../component/chat/ChatWindow';
+import axios from 'axios';
 
 export default function ChatPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true); 
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+  //임시용
   const [user, setUser] = useState({
     nickname: '산모', age: 29, district: '마포구', childCount: 0, hasHouse: false, pregnancyWeeks: 22,
   });
 
-  // 💡 [수정됨] 백엔드 규격(senderType, content)으로 통일!
-  const [messages, setMessages] = useState([
-    { id: 1, senderType: 'ASSISTANT', content: '안녕하세요! 어떤 복지 혜택을 도와드릴까요?' },
-    { id: 2, senderType: 'USER', content: '지금 내가 받을 수 있는 지원금은 뭐가 있을까?' },
-    { id: 3, senderType: 'ASSISTANT', content: '산모님이 받을 수 있는 지원금은 여러 종류가 있어요. 대표적인 지원금을 알려드릴게요!' }
-  ]);
+
+  const [messages, setMessages] = useState([]);
+    
   const [isLoading, setIsLoading] = useState(false);
 
-  // 💡 [수정됨] ChatWindow에서 입력한 텍스트(inputText)를 인자로 받습니다.
+  //화면이 켜지자마자 과거채팅 불러오기
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+
+    //토큰 없으면 로그인창으로 이동
+    if(!token){
+      alert("로그인을 해주시기 바랍니다.");
+      navigate('/login');
+      return;
+    }
+
+    //이전 대화록 가져오기 (GET)
+    const fetchHistory = async () => {
+      try{
+        const response = await fetch('http://localhost:8080/api/v1/chats/messages', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.status === 403) throw new Error('토큰 만료');
+        if (!response.ok) throw new Error('서버 에러');
+
+        const data = await response.json();
+        setMessages(data); // 백엔드에서 준 과거 대화로 화면 채우기!
+      } catch (error) {
+        console.log("채팅내역 불러오기 실패: " + error);
+        if (error.messages === '토큰 만료'){
+          alert("로그인이 만료되었습니다. 다시 로그인 하십시오.");
+          localStorage.removeItem('access_token');
+          navigate('/login');
+        }
+      }
+    };
+
+    fetchHistory();
+  }, [navigate]);
+
+
+  //ChatWindow에서 입력한 텍스트(inputText)를 인자로 받습니다.
   const handleSendMessage = async (inputText) => {
     if (!inputText.trim()) return;
 
@@ -27,28 +69,32 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      // 💡 [중요] 아까 백엔드에 만든 가짜 필터를 통과하기 위한 더미 토큰 (유저 ID: 1)
-      const dummyToken = 'dummy-jwt-token-userid-1-abcd';
+      const token = localStorage.getItem('access_token');;
 
-      const response = await fetch('http://localhost:8081/api/v1/chats/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${dummyToken}` // 문지기 통과용 출입증!
-        },
-        body: JSON.stringify({ content: inputText }), // 백엔드 ChatRequestDto 규격
-      });
+      //axios.post('주소', {바디데이터}, {헤더설정}) 순서
+      //왜 위에는 fetch이고 밑에는 axios라고 묻는다면 다양한 방법으로 한번 해보고 샆었습니다.
+      const response = await axios.post('http://localhost:8080/api/v1/chats/messages', 
+        { content: inputText }, // 바디 (보낼 데이터)
+        { 
+          headers: { 'Authorization': `Bearer ${token}` } // 헤더 (신분증)
+        }
+      );
 
-      if (!response.ok) throw new Error('서버 응답 에러');
-      const data = await response.json();
+      const data = response.data;  
 
-      // 3. 백엔드에서 받은 답변을 화면에 띄움
+      //백엔드에서 받은 답변을 화면에 띄움
       setMessages((prev) => [
         ...prev,
         { id: Date.now() + 1, senderType: data.senderType || 'ASSISTANT', content: data.answer }
       ]);
     } catch (error) {
       console.error('통신 에러:', error);
+
+      if (error.response && error.response.status === 403){
+        alert("로그인이 만료되었습니다");
+        navigate('/login');
+        return;
+      }
       setMessages((prev) => [
         ...prev,
         { id: Date.now() + 1, senderType: 'ASSISTANT', content: '앗! 서버랑 연결이 끊어졌어요. 낑낑...' }

@@ -4,6 +4,7 @@ import NotFound from '../pages/NotFound.jsx';
 import Ex from '../component/ex.jsx';
 import KakaoCallback from '../pages/KakaoCallback.jsx';
 import Terms from '../pages/Terms.jsx';
+import ChatPage from '../pages/ChatPage.jsx';
 
 function Router() {
   return (
@@ -13,7 +14,11 @@ function Router() {
         <Route path="/ex" element={<Ex />} />
         <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/login" element={<Home />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path='/test-chat' element={<ChatPage />} />
         <Route path="*" element={<NotFound />} />
+        
       </Routes>
     </BrowserRouter>
   );

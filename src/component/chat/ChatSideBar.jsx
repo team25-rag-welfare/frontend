@@ -11,9 +11,13 @@ export default function ChatSidebar({ isLoggedIn, user, onLogout }) {
 
   const [keyword, setKeyword] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
+  const [showMemory, setShowMemory] = useState(false); // 메모리 창 열림/닫힘 스위치
+  const [memories, setMemories] = useState([]); // 백엔드에서 받아온 메모리 목록
   const [showCalender, setShowCalender] = useState(false); //달력 창 열고 닫는 switch
   const [results, setResults] = useState([]);
   const [isSearch, setIsSearch] = useState(false);
+  const [selectedMemoryId, setSelectedMemoryId] = useState(null); // 클릭해서 선택한 메모리 ID
+  const [isLoadingMemories, setIsLoadingInMemories] = useState(false);
 
   const handleSearch = async () => {
     if(!keyword.trim()) return;
@@ -57,9 +61,57 @@ export default function ChatSidebar({ isLoggedIn, user, onLogout }) {
       setIsSearch(false);
     }
   }
+
+  const handleFetchMemories = async () => {
+    // 이미 열려있는데 또 누르면 닫히게 토글 처리!
+    if (showMemory) {
+      setShowMemory(false);
+      setSelectedMemoryId(null);
+      return;
+    }
+
+    setIsLoadingInMemories(true);
+    setShowMemory(true);
+
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      const response = await axios.get('http://localhost:8080/api/v1/memories', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setMemories(response.data); // 데이터 구조가{id: 1, content: '내용'}, ... ]
+    } catch (error) {
+      console.error('메모리 조회 실패:', error);
+      alert('메모리를 불러오는데 실패했습니다.');
+    } finally {
+      setIsLoadingInMemories(false);
+    }
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') handleSearch();
   }
+
+  const handleDeleteMemory = async (memoryId) => {
+    if (!window.confirm("이 메모리를 정말 삭제하시겠습니까?")) return;
+
+    try {
+      const token = localStorage.getItem('acces_token');
+      
+      await axios.delete(`http://localhost:8080/api/v1/memories/${memoryId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      alert('성공적으로 삭제되었습니다!');
+      
+      // 삭제 성공 후 프론트 화면에서도 해당 메모리를 즉시 지워줍니다 (새로고침 방지)
+      setMemories((prev) => prev.filter(item => item.id !== memoryId));
+      setSelectedMemoryId(null); // 선택 해제
+    } catch (error) {
+      console.error('메모리 삭제 실패:', error);
+      alert('메모리 삭제 중 에러가 발생했습니다.');
+    }
+  };
 
 
   return (
@@ -185,6 +237,54 @@ export default function ChatSidebar({ isLoggedIn, user, onLogout }) {
           <span className="bg-[#E6F4EA] text-[#34A853] px-4 py-2 rounded-full text-sm font-bold border border-[#CEEAD6]">{displayUser.district ?? 'null'}</span>
           <span className="bg-gray-50 text-gray-500 px-4 py-2 rounded-full text-sm font-bold border border-gray-200">29세</span>
         </div>
+      </div>
+
+      <div className="mt-6">
+        {/* Memory 조회하기 버튼 */}
+        <button 
+          onClick={handleFetchMemories}
+          className="w-full bg-white text-gray-700 py-4 px-6 rounded-2xl text-base font-bold shadow-sm border border-pink-100 hover:bg-pink-50/50 transition-all flex justify-between items-center"
+        >
+          <span>🧠 사용자 메모리 조회하기</span>
+          <span className="text-xs text-gray-400">{showMemory ? '▲' : '▼'}</span>
+        </button>
+
+        {/* 버튼을 눌러 showMemory가 true가 되면 리스트가 쫙 열립니다 */}
+        {showMemory && (
+          <div className="mt-3 bg-white/70 rounded-2xl p-4 shadow-inner border border-pink-50 max-h-[250px] overflow-y-auto space-y-2">
+            {isLoadingMemories && <p className="text-sm text-gray-400 text-center py-2">불러오는 중... 💫</p>}
+            
+            {!isLoadingMemories && memories.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-4">저장된 메모리가 없습니다.</p>
+            )}
+
+            {!isLoadingMemories && memories.map((item) => (
+              <div key={item.id} className="space-y-2">
+                {/* 메모리 텍스트 아이템 */}
+                <div 
+                  onClick={() => setSelectedMemoryId(selectedMemoryId === item.id ? null : item.id)}
+                  className={`p-3 rounded-xl text-sm transition-all cursor-pointer ${
+                    selectedMemoryId === item.id 
+                      ? 'bg-pink-100 text-pink-700 font-bold border border-pink-200' 
+                      : 'bg-white text-gray-600 hover:bg-white/90 border border-transparent'
+                  }`}
+                >
+                  {item.content}
+                </div>
+
+                {/* 메모리를 누르면 바로 밑에 스윽 나타나는 삭제 버튼! */}
+                {selectedMemoryId === item.id && (
+                  <button
+                    onClick={() => handleDeleteMemory(item.id)}
+                    className="w-full bg-red-50 text-red-500 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition-all transform active:scale-95"
+                  >
+                    ❌ 이 메모리 삭제하기
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 로그아웃 버튼 (하단 고정) */}

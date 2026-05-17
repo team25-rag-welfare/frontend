@@ -59,8 +59,8 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
       </div>
 
       {/* 하단 입력창 (크고 아름답게) */}
-      <div className="p-10 bg-transparent shrink-0">
-        <div className="relative max-w-5xl mx-auto bg-white rounded-[25px] shadow-2xl border border-white/50 flex p-2">
+      <div className="p-12 bg-transparent shrink-0">
+        <div className="relative max-w-6xl mx-auto bg-white rounded-[28px] shadow-2xl border border-white/50 flex p-3">
           <input 
             type="text" 
             value={inputText}
@@ -68,14 +68,14 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
             onKeyDown={(e) => e.key === 'Enter' && onSendClick()}
             placeholder={isLoggedIn ? "무엇을 알고 싶으세요?" : "로그인 후 질문하실 수 있습니다."} 
             disabled={!isLoggedIn || isLoading} 
-            className="flex-1 py-6 px-8 text-xl outline-none text-gray-700 disabled:bg-gray-50 rounded-l-[20px]"
+            className="flex-1 py-8 px-10 text-2xl outline-none text-gray-700 disabled:bg-gray-50 rounded-l-[22px]"
           />
           <button 
             onClick={onSendClick}
             disabled={!isLoggedIn || isLoading}
-            className="bg-[#E2F0D9] text-[#5A8743] w-20 h-20 flex items-center justify-center rounded-[20px] hover:bg-[#D4E8C9] transition-all disabled:opacity-50 shadow-inner group"
+            className="bg-[#E2F0D9] text-[#5A8743] w-24 h-24 flex items-center justify-center rounded-[22px] hover:bg-[#D4E8C9] transition-all disabled:opacity-50 shadow-inner group"
           >
-            <span className="text-4xl group-hover:scale-110 transition-transform">↑</span>
+            <span className="text-5xl group-hover:scale-110 transition-transform">↑</span>
           </button>
         </div>
       </div>

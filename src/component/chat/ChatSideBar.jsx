@@ -3,7 +3,7 @@ import React, { use, useState } from 'react';
 import axios from 'axios';
 
 
-export default function ChatSidebar({ isLoggedIn, user }) {
+export default function ChatSidebar({ isLoggedIn, user, onLogout }) {
   // 데이터가 없을 때를 대비한 기본값(null 처리)
   const displayUser = user || {
     nickname: '사용자', age: null, district: '미입력', childCount: null, hasHouse: null, pregnancyWeeks: null
@@ -189,7 +189,9 @@ export default function ChatSidebar({ isLoggedIn, user }) {
 
       {/* 로그아웃 버튼 (하단 고정) */}
       <div className="mt-auto pt-6 border-t border-pink-200 flex justify-between items-center">
-        <button className="bg-[#FF9E9E] text-white text-lg font-black py-4 px-10 rounded-2xl shadow-lg hover:bg-[#FF8585] transition-all transform active:scale-95">
+        <button 
+          onClick={onLogout}
+          className="bg-[#FF9E9E] text-white text-lg font-black py-4 px-10 rounded-2xl shadow-lg hover:bg-[#FF8585] transition-all transform active:scale-95">
           로그아웃
         </button>
         <button className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm hover:shadow-md transition-all text-gray-300">

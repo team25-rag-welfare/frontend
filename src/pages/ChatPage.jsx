@@ -108,7 +108,7 @@ export default function ChatPage() {
   const handleLogout = () => {
     if (window.confirm('진짜로 로그아웃 하시겠습니까?')){
       localStorage.removeItem('access_token');
-      navigate('/';)
+      navigate('/');
     }
   };
 

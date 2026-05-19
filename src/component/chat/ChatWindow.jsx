@@ -1,7 +1,8 @@
 // src/components/chat/ChatWindow.jsx
 import React, { useState } from 'react';
+import Onboarding from '../Onboarding';
 
-export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, isLoading }) {
+export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, isLoading, showOnboarding, onOnboardingComplete }) {
   const [inputText, setInputText] = useState('');
 
   const onSendClick = () => {
@@ -30,6 +31,12 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
           <span className="text-sm font-bold text-gray-400 mx-6 bg-white/50 px-4 py-1 rounded-full">2026년 04월 06일</span>
           <div className="border-t border-gray-200 flex-1"></div>
         </div>
+
+        {showOnboarding && (
+          <div className="flex items-center justify-center py-10">
+           <Onboarding onClose={onOnboardingComplete} />
+          </div>
+        )}
 
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${msg.senderType === 'USER' ? 'justify-end' : 'items-start space-x-4'}`}>

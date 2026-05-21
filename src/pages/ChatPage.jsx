@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ChatSidebar from '../component/chat/ChatSidebar';
 import ChatWindow from '../component/chat/ChatWindow';
 import axios from 'axios';
+import Onboarding from '../component/Onboarding';
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
     
   const [isLoading, setIsLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   //화면이 켜지자마자 과거채팅 불러오기
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function ChatPage() {
     //이전 대화록 가져오기 (GET)
     const fetchHistory = async () => {
       try{
-        const response = await fetch('http://localhost:8080/api/v1/chats/messages', {
+        const response = await fetch('http://localhost:8081/api/v1/chats/messages', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -56,6 +58,21 @@ export default function ChatPage() {
     };
 
     fetchHistory();
+    // 온보딩 여부 확인
+    if (token) {
+      axios.get('http://localhost:8081/api/v1/profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(response => {
+        const { district, pregnancyStatus, userAge, childCount } = response.data;
+        // 필수 정보 하나라도 없으면 온보딩 띄우기
+        if (!district || !pregnancyStatus || !userAge || !childCount) {
+          setShowOnboarding(true);
+        }
+      }).catch(() => {
+        // 비회원이거나 에러나면 온보딩 띄우기
+        setShowOnboarding(true);
+      });
+    }
   }, [navigate]);
 
 
@@ -74,7 +91,7 @@ export default function ChatPage() {
 
       //axios.post('주소', {바디데이터}, {헤더설정}) 순서
       //왜 위에는 fetch이고 밑에는 axios라고 묻는다면 다양한 방법으로 한번 해보고 샆었습니다.
-      const response = await axios.post('http://localhost:8080/api/v1/chats/messages', 
+      const response = await axios.post('http://localhost:8081/api/v1/chats/messages', 
         { content: inputText }, // 바디 (보낼 데이터)
         { 
           headers: { 'Authorization': `Bearer ${token}` } // 헤더 (신분증)
@@ -114,14 +131,16 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      <ChatSidebar isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} />
+      <ChatSidebar isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} onEditCondition={() => setShowOnboarding(true)} />
       
       <ChatWindow 
         isLoggedIn={isLoggedIn} 
         user={user} 
         messages={messages} 
-        onSendMessage={handleSendMessage} // 💡 자식에게 통신 함수를 물려줌!
-        isLoading={isLoading} 
+        onSendMessage={handleSendMessage}
+        isLoading={isLoading}
+        showOnboarding={showOnboarding}
+        onOnboardingComplete={() => setShowOnboarding(false)}
       />
     </div>
   );

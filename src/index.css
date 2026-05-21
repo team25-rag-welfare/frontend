@@ -1,3 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Outfit', 'Noto Sans KR', sans-serif;
+  --font-jua: 'Jua', sans-serif;
+  --font-gowun: 'Gowun Dodum', sans-serif;
+
+  --animate-heartbeat: heartbeat 2s infinite ease-in-out;
+  --animate-bounce-subtle: bounce-subtle 2.5s infinite ease-in-out;
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+}

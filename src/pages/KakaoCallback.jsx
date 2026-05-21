@@ -13,18 +13,22 @@ const KakaoCallback = () => {
         const code = new URL(window.location.href).searchParams.get('code');
         
         if (code) {
-            axios.post('http://localhost:8081/api/auth/kakao', {
+            axios.post('http://localhost:8080/api/auth/kakao', {
                 auth_code: code
             })
             .then(response => {
                 const { access_token, is_new_user } = response.data;
                 localStorage.setItem('access_token', access_token);
                 
+                // Temporarily redirect to root for logout testing
+                navigate('/');
+                /* Original flow
                 if (is_new_user) {
                     navigate('/terms');   // 신규 회원 → 약관동의 → 온보딩 순서
                 } else {
                     navigate('/chat');
                 }
+                */
             })
             .catch(error => {
                 console.error('Login error:', error);

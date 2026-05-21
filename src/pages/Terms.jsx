@@ -17,7 +17,7 @@ const Terms = () => {
         try {
             const token = localStorage.getItem('access_token');
             await axios.post(
-                'http://localhost:8081/api/auth/terms',
+                'http://localhost:8080/api/auth/terms',
                 {},
                 {
                     headers: { Authorization: `Bearer ${token}` }

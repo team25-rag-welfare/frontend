@@ -3,7 +3,7 @@ import React, { use, useState } from 'react';
 import axios from 'axios';
 
 
-export default function ChatSidebar({ isLoggedIn, user, onLogout }) {
+export default function ChatSidebar({ isLoggedIn, user, onLogout, onEditCondition }) {
   // 데이터가 없을 때를 대비한 기본값(null 처리)
   const displayUser = user || {
     nickname: '사용자', age: null, district: '미입력', childCount: null, hasHouse: null, pregnancyWeeks: null
@@ -201,7 +201,7 @@ export default function ChatSidebar({ isLoggedIn, user, onLogout }) {
       <div className="bg-white rounded-[30px] p-8 shadow-lg border border-pink-50">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-black text-gray-800">내 조건</h2>
-          <button className="text-sm font-bold text-gray-400 bg-gray-50 px-4 py-2 rounded-full border border-gray-100 hover:bg-gray-100 transition-all">
+          <button onClick={onEditCondition} className="text-sm font-bold text-gray-400 bg-gray-50 px-4 py-2 rounded-full border border-gray-100 hover:bg-gray-100 transition-all">
             수정 →
           </button>
         </div>

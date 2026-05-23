@@ -1,8 +1,9 @@
 // src/components/chat/ChatWindow.jsx
 import React, { useState } from 'react';
 import Onboarding from '../Onboarding';
+import ConditionEdit from '../ConditionEdit';
 
-export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, isLoading, showOnboarding, onOnboardingComplete }) {
+export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, isLoading, showOnboarding, onOnboardingComplete, showConditionEdit, onConditionEditClose }) {
   const [inputText, setInputText] = useState('');
 
   const onSendClick = () => {
@@ -35,6 +36,12 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
         {showOnboarding && (
           <div className="flex items-center justify-center py-10">
            <Onboarding onClose={onOnboardingComplete} />
+          </div>
+        )}
+
+        {showConditionEdit && (
+          <div className="flex items-center justify-center py-10">
+            <ConditionEdit onClose={onConditionEditClose} />
           </div>
         )}
 

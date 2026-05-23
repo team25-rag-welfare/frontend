@@ -5,6 +5,7 @@ import ChatSidebar from '../component/chat/ChatSidebar';
 import ChatWindow from '../component/chat/ChatWindow';
 import axios from 'axios';
 import Onboarding from '../component/Onboarding';
+import ConditionEdit from '../component/ConditionEdit';
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function ChatPage() {
     
   const [isLoading, setIsLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showConditionEdit, setShowConditionEdit] = useState(false);
 
   //화면이 켜지자마자 과거채팅 불러오기
   useEffect(() => {
@@ -131,7 +133,11 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      <ChatSidebar isLoggedIn={isLoggedIn} user={user} onLogout={handleLogout} onEditCondition={() => setShowOnboarding(true)} />
+      <ChatSidebar 
+      isLoggedIn={isLoggedIn} 
+      user={user} 
+      onLogout={handleLogout} 
+      onEditCondition={() => setShowConditionEdit(true)} />
       
       <ChatWindow 
         isLoggedIn={isLoggedIn} 
@@ -141,6 +147,8 @@ export default function ChatPage() {
         isLoading={isLoading}
         showOnboarding={showOnboarding}
         onOnboardingComplete={() => setShowOnboarding(false)}
+        showConditionEdit={showConditionEdit}
+        onConditionEditClose={() => setShowConditionEdit(false)}
       />
     </div>
   );

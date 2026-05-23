@@ -6,6 +6,7 @@ import ChatWindow from '../component/chat/ChatWindow';
 import axios from 'axios';
 import Onboarding from '../component/Onboarding';
 import ConditionEdit from '../component/ConditionEdit';
+import SettingsModal from '../component/settings/SettingsModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -17,6 +18,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showConditionEdit, setShowConditionEdit] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [jumpToDate, setJumpToDate] = useState(null);
   const [searchMatches, setSearchMatches] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -29,6 +31,24 @@ export default function ChatPage() {
   const handleClearSearch = () => {
     setSearchMatches([]);
     setSearchKeyword('');
+  };
+
+  const fetchProfile = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    try {
+      const response = await axios.get(`${API_URL}/api/v1/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(response.data);
+      const { district, pregnancyStatus, userAge, childCount } = response.data;
+      if (!district || !pregnancyStatus || userAge == null || childCount == null) {
+        setShowOnboarding(true);
+      }
+    } catch (error) {
+      console.error('프로필 조회 실패:', error);
+      setShowOnboarding(true);
+    }
   };
 
   useEffect(() => {
@@ -44,9 +64,7 @@ export default function ChatPage() {
       try {
         const response = await fetch(`${API_URL}/api/v2/chats/history`, {
           method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.status === 403) {
@@ -58,47 +76,14 @@ export default function ChatPage() {
         }
 
         const data = await response.json();
-
-        setMessages(
-          data.map((msg, i) => ({
-            ...msg,
-            id: msg.id ?? `loaded-${i}`,
-          }))
-        );
+        setMessages(data.map((msg, i) => ({ ...msg, id: msg.id ?? `loaded-${i}` })));
       } catch (error) {
         console.log('채팅내역 불러오기 실패:', error);
-
         if (error.message === '토큰 만료') {
           alert('로그인이 만료되었습니다. 다시 로그인 하십시오.');
           localStorage.removeItem('access_token');
           navigate('/login');
         }
-      }
-    };
-
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/v1/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        console.log('프로필 응답:', response.data);
-
-        setUser(response.data);
-
-        const { district, pregnancyStatus, userAge, childCount } = response.data;
-
-        if (!district || !pregnancyStatus || userAge == null || childCount == null) {
-          setShowOnboarding(true);
-        }
-      } catch (error) {
-        console.error('프로필 조회 실패:', error);
-        console.error('status:', error.response?.status);
-        console.error('data:', error.response?.data);
-
-        setShowOnboarding(true);
       }
     };
 
@@ -157,7 +142,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      <ChatSidebar isLoggedIn={isLoggedIn} user={user} messages={messages} onLogout={handleLogout} onEditCondition={() => setShowConditionEdit(true)} onDateSelect={setJumpToDate} onSearch={handleSearch} />
+      <ChatSidebar isLoggedIn={isLoggedIn} user={user} messages={messages} onLogout={handleLogout} onEditCondition={() => setShowConditionEdit(true)} onDateSelect={setJumpToDate} onSearch={handleSearch} onOpenSettings={() => setShowSettings(true)} />
 
       <ChatWindow
         isLoggedIn={isLoggedIn}
@@ -172,9 +157,11 @@ export default function ChatPage() {
         searchKeyword={searchKeyword}
         onClearSearch={handleClearSearch}
       />
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+
       {showConditionEdit && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <ConditionEdit onClose={() => setShowConditionEdit(false)} />
+          <ConditionEdit onClose={() => setShowConditionEdit(false)} onSave={fetchProfile} />
         </div>
       )}
     </div>

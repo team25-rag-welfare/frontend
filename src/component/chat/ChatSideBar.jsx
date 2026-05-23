@@ -25,7 +25,7 @@ function InfoRow({ label, value, highlight }) {
 
 const getDateKey = (dateStr) => new Date(dateStr).toISOString().slice(0, 10);
 
-export default function ChatSidebar({ user, messages = [], onLogout, onEditCondition, onDateSelect, onSearch }) {
+export default function ChatSidebar({ user, messages = [], onLogout, onEditCondition, onDateSelect, onSearch, onOpenSettings }) {
   const u = user || {
     userName: null,
     userAge: null,
@@ -158,7 +158,7 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
           <button onClick={onLogout} style={{ fontSize: 12, color: 'var(--ink-hint)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
             로그아웃
           </button>
-          <button style={{ border: 'none', background: 'none', fontSize: 20, color: 'var(--ink-lt)', cursor: 'pointer' }}>
+          <button onClick={onOpenSettings} style={{ border: 'none', background: 'none', fontSize: 20, color: 'var(--ink-lt)', cursor: 'pointer' }}>
             ⚙️
           </button>
         </div>

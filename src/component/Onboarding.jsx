@@ -37,7 +37,7 @@ export default function Onboarding({ onClose }) {
   try {
     if (token) {
       // 회원이면 API에 저장
-      await axios.post('http://localhost:8081/api/v1/profile/onboarding', {
+      await axios.post('http://localhost:8080/api/v1/profile/onboarding', {
         pregnancyStatus: formData.pregnancyStatus,
         userAge: parseInt(formData.userAge),
         district: formData.district,

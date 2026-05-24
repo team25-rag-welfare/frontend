@@ -13,7 +13,7 @@ const KakaoCallback = () => {
         const code = new URL(window.location.href).searchParams.get('code');
         
         if (code) {
-            axios.post('http://localhost:8081/api/auth/kakao', {
+            axios.post('http://localhost:8080/api/auth/kakao', {
                 auth_code: code
             })
             .then(response => {

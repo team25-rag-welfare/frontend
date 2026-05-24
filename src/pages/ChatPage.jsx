@@ -35,7 +35,7 @@ export default function ChatPage() {
     //이전 대화록 가져오기 (GET)
     const fetchHistory = async () => {
       try{
-        const response = await fetch('http://localhost:8081/api/v1/chats/messages', {
+        const response = await fetch('http://localhost:8080/api/v1/chats/history', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -60,7 +60,7 @@ export default function ChatPage() {
     fetchHistory();
     // 온보딩 여부 확인
     if (token) {
-      axios.get('http://localhost:8081/api/v1/profile', {
+      axios.get('http://localhost:8080/api/v1/profile', {
         headers: { Authorization: `Bearer ${token}` }
       }).then(response => {
         const { district, pregnancyStatus, userAge, childCount } = response.data;
@@ -91,7 +91,7 @@ export default function ChatPage() {
 
       //axios.post('주소', {바디데이터}, {헤더설정}) 순서
       //왜 위에는 fetch이고 밑에는 axios라고 묻는다면 다양한 방법으로 한번 해보고 샆었습니다.
-      const response = await axios.post('http://localhost:8081/api/v1/chats/messages', 
+      const response = await axios.post('http://localhost:8080/api/v1/chats/messages', 
         { content: inputText }, // 바디 (보낼 데이터)
         { 
           headers: { 'Authorization': `Bearer ${token}` } // 헤더 (신분증)

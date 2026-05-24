@@ -1,0 +1,32 @@
+.btn-nav {
+  padding: 10px 24px;
+  border-radius: 9999px;
+  border: none;
+  background: linear-gradient(135deg, #FFB7C5, #F096AD);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(255,183,197,.5);
+  transition: all .18s ease;
+}
+.btn-nav:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,183,197,.65);
+  background: linear-gradient(135deg, #F096AD, #E07A9A);
+}
+.btn-nav:active { transform: scale(.96); }
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(253,248,248,.8);
+  border: 1px solid rgba(242,199,199,.3);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.benefit-item:hover { border-color: rgba(255,183,197,.6); }

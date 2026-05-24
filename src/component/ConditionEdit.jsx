@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function ConditionEdit({ onClose }) {
+const API_URL = import.meta.env.VITE_API_URL;
+
+export default function ConditionEdit({ onClose, onSave }) {
   const [pregnancyStatus, setPregnancyStatus] = useState('');
   const [formData, setFormData] = useState({
     userAge: '',
@@ -20,7 +22,7 @@ export default function ConditionEdit({ onClose }) {
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
-    axios.get('http://localhost:8081/api/v1/profile', {
+    axios.get(`${API_URL}/api/v1/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(response => {
       const d = response.data;
@@ -44,7 +46,7 @@ export default function ConditionEdit({ onClose }) {
     setLoading(true);
     const token = localStorage.getItem('access_token');
     try {
-      await axios.put('http://localhost:8081/api/v1/profile', {
+      await axios.put(`${API_URL}/api/v1/profile`, {
         pregnancyStatus,
         userAge: parseInt(formData.userAge),
         district: formData.district,
@@ -60,6 +62,7 @@ export default function ConditionEdit({ onClose }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('저장되었습니다!');
+      onSave?.();
       onClose();
     } catch (error) {
       alert('저장에 실패했습니다.');

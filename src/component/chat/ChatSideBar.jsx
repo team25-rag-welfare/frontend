@@ -7,9 +7,9 @@ import MiniCalendar from '../ui/MiniCalendar';
 const API_URL = import.meta.env.VITE_API_URL;
 
 const STATUS_LABEL = {
+  PLANNING: '임신 준비 중',
   PREGNANT: '임신 중',
-  POSTPARTUM: '산후',
-  PARENTING: '육아 중',
+  POSTPARTUM: '출산 후'
 };
 
 function InfoRow({ label, value, highlight }) {
@@ -69,7 +69,7 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
     }
   };
 
-  const statusLabel = STATUS_LABEL[u.pregnancyStatus] || '임신 중';
+  const statusLabel = STATUS_LABEL[u.pregnancyStatus] || '미입력';
 
   const subStatus = [
     u.pregnancyWeeks ? `${u.pregnancyWeeks}주차` : null,

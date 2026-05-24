@@ -25,8 +25,8 @@ const Terms = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 }
             );
-            // 약관 동의 완료 → 온보딩 페이지로 이동
-            navigate('/onboarding');
+            // 약관 동의 완료 → 채팅 페이지로 이동 (진입 시 온보딩 모달이 자동 활성화됨)
+            navigate('/chat');
         } catch (error) {
             console.error('약관 동의 실패:', error);
             alert('약관 동의 처리에 실패했습니다. 다시 시도해주세요.');

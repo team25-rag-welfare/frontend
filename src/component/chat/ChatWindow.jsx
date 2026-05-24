@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import Onboarding from '../Onboarding';
 import Button from '../ui/Button';
 
@@ -27,15 +28,23 @@ function highlightText(text, keyword) {
   );
 }
 
-function MessageRow({ msg, keyword }) {
+function MessageRow({ msg, keyword, onRegenerate, isLoading }) {
   const isUser = msg.senderType === 'USER';
   return (
     <div id={`msg-${msg.id}`} className={`msg-row anim-fadeup ${isUser ? 'msg-row-user' : 'msg-row-ai'}`}>
       {!isUser && <Avatar />}
       <div className={`msg-bubble-wrapper ${isUser ? 'msg-bubble-wrapper-user' : 'msg-bubble-wrapper-ai'}`}>
-        <div className={isUser ? 'bubble-user' : 'bubble-ai'} style={{ whiteSpace: 'pre-wrap' }}>
-          {highlightText(msg.content, keyword)}
+        <div className={isUser ? 'bubble-user' : 'bubble-ai'}>
+          {isUser
+            ? <span style={{ whiteSpace: 'pre-wrap' }}>{highlightText(msg.content, keyword)}</span>
+            : <div className="md-content"><ReactMarkdown>{msg.content}</ReactMarkdown></div>
+          }
         </div>
+        {!isUser && (
+          <button className="msg-regen-btn" onClick={() => onRegenerate(msg.id)} disabled={isLoading}>
+            ↺
+          </button>
+        )}
       </div>
     </div>
   );
@@ -62,7 +71,7 @@ function TypingRow() {
 const getDateKey = (dateStr) => new Date(dateStr).toISOString().slice(0, 10);
 const formatDateLabel = (dateKey) => dateKey.replace(/-/g, '.');
 
-export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, isLoading, showOnboarding, onOnboardingComplete, jumpToDate, searchMatches = [], searchKeyword = '', onClearSearch }) {
+export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, onRegenerate, isLoading, showOnboarding, onOnboardingComplete, jumpToDate, searchMatches = [], searchKeyword = '', onClearSearch }) {
   const [inputText, setInputText] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
   const scrollRef = useRef(null);
@@ -176,7 +185,7 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
                     <div className="chat-date-line" />
                   </div>
                 )}
-                <MessageRow msg={msg} keyword={searchKeyword} />
+                <MessageRow msg={msg} keyword={searchKeyword} onRegenerate={onRegenerate} isLoading={isLoading} />
               </React.Fragment>
             );
           })}

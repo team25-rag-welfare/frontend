@@ -94,7 +94,7 @@ export default function ChatPage() {
   const handleSendMessage = async (inputText) => {
     if (!inputText.trim()) return;
 
-    const userMsg = { id: Date.now(), senderType: 'USER', content: inputText };
+    const userMsg = { id: `temp-${Date.now()}`, senderType: 'USER', content: inputText };
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
@@ -114,7 +114,7 @@ export default function ChatPage() {
 
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, senderType: data.senderType || 'ASSISTANT', content }
+        { id: data.messageId, senderType: data.senderType || 'ASSISTANT', content }
       ]);
     } catch (error) {
       console.error('통신 에러:', error);
@@ -128,6 +128,31 @@ export default function ChatPage() {
         ...prev,
         { id: Date.now() + 1, senderType: 'ASSISTANT', content: '앗! 서버랑 연결이 끊어졌어요.' }
       ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegenerate = async (chatId) => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await axios.post(
+        `${API_URL}/api/v2/chats/${chatId}/regenerate`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = response.data;
+      const content = data.policies && data.policies.length > 0
+        ? data.policies.map(p => p.policyName ? `[${p.policyName}]\n${p.content}` : p.content).join('\n\n')
+        : '관련 정책을 찾지 못했어요.';
+      setMessages(prev => prev.map(msg => msg.id === chatId ? { ...msg, content } : msg));
+    } catch (error) {
+      console.error('재생성 에러:', error);
+      if (error.response?.status === 403) {
+        alert('로그인이 만료되었습니다');
+        navigate('/login');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -149,6 +174,7 @@ export default function ChatPage() {
         user={user}
         messages={messages}
         onSendMessage={handleSendMessage}
+        onRegenerate={handleRegenerate}
         isLoading={isLoading}
         showOnboarding={showOnboarding}
         onOnboardingComplete={() => setShowOnboarding(false)}

@@ -5,6 +5,7 @@ import KakaoCallback from '../pages/KakaoCallback.jsx';
 import Terms from '../pages/Terms.jsx';
 import ChatPage from '../pages/ChatPage.jsx';
 import Login from '../pages/Login.jsx';
+import Onboarding from '../component/Onboarding.jsx';
 
 
 function Router() {
@@ -13,6 +14,7 @@ function Router() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
+        <Route path='/onboarding' element={<Onboarding onClose={() => window.location.href = '/chat'} />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<ChatPage />} />

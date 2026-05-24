@@ -108,9 +108,16 @@ export default function ChatPage() {
 
       const data = response.data;
 
-      const content = data.policies && data.policies.length > 0
-        ? data.policies.map(p => p.policyName ? `[${p.policyName}]\n${p.content}` : p.content).join('\n\n')
-        : '관련 정책을 찾지 못했어요.';
+      const content = data.policies && data.policies.length > 0 ?
+      data.policies.map(p => {
+        //policyName이 진짜 있고, 문자열 'null'도 아니고, 빈칸도 아닐 때만 true!
+        const isValidName = p.policyName && p.policyName !== 'null' && p.policyName.trim() !== '';
+        
+        return isValidName 
+            ? `[${p.policyName}]\n${p.content}` 
+            : p.content;
+    }).join('\n\n')
+    : '관련 정책을 찾지 못했어요.';
 
       setMessages((prev) => [
         ...prev,

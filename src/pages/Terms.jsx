@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Terms = () => {
     const navigate = useNavigate();
     const [agreed, setAgreed] = useState(false);
@@ -17,7 +19,7 @@ const Terms = () => {
         try {
             const token = localStorage.getItem('access_token');
             await axios.post(
-                'http://localhost:8080/api/auth/terms',
+                `${API_URL}/api/auth/terms`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${token}` }

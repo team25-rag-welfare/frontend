@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Onboarding({ onClose }) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -37,7 +39,7 @@ export default function Onboarding({ onClose }) {
   try {
     if (token) {
       // 회원이면 API에 저장
-      await axios.post('http://localhost:8080/api/v1/profile/onboarding', {
+      await axios.post(`${API_URL}/api/v1/profile/onboarding`, {
         pregnancyStatus: formData.pregnancyStatus,
         userAge: parseInt(formData.userAge),
         district: formData.district,

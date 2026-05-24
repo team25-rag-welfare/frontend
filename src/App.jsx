@@ -1,7 +1,6 @@
 import React from 'react';
 import { useState } from 'react'
-import './App.css'
-import useStore from './store/useStore';
+import useStore from './store/authStore';
 import Router from './routes/router';
 import ChatPage from './pages/ChatPage';
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Onboarding({ onClose }) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -29,28 +31,26 @@ export default function Onboarding({ onClose }) {
 
   const handleSubmit = async () => {
     if (!formData.childCount && formData.childCount !== 0) {
-    alert('자녀 수를 입력해주세요!');
-    return;
-  }
-  const token = localStorage.getItem('access_token');
-  
-  try {
-    if (token) {
-      // 회원이면 API에 저장
-      await axios.post('http://localhost:8080/api/v1/profile/onboarding', {
-        pregnancyStatus: formData.pregnancyStatus,
-        userAge: parseInt(formData.userAge),
-        district: formData.district,
-        childCount: parseInt(formData.childCount),
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      alert('자녀 수를 입력해주세요!');
+      return;
     }
-    onClose();
-  } catch (error) {
-    onClose(); // 실패해도 일단 닫기
-  }
-};
+    const token = localStorage.getItem('access_token');
+    try {
+      if (token) {
+        await axios.post(`${API_URL}/api/v1/profile/onboarding`, {
+          pregnancyStatus: formData.pregnancyStatus,
+          userAge: parseInt(formData.userAge),
+          district: formData.district,
+          childCount: parseInt(formData.childCount),
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      onClose();
+    } catch (error) {
+      onClose(); // 실패해도 일단 닫기
+    }
+  };
 
   return (
     <div style={{

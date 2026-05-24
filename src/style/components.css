@@ -1,0 +1,212 @@
+/* ── BUTTON ─────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.btn:disabled          { opacity: .4; cursor: not-allowed; }
+.btn:not(:disabled):active { transform: scale(.95); }
+
+.btn-sm  { font-size: 11px; padding: 6px 16px;  border-radius: var(--r-pill); }
+.btn-md  { font-size: 13px; padding: 10px 24px; border-radius: var(--r-pill); }
+.btn-lg  { font-size: 15px; padding: 13px 32px; border-radius: var(--r-pill); font-weight: 800; }
+
+.btn-primary {
+  background: var(--petal);
+  color: white;
+  box-shadow: var(--shadow-petal);
+}
+.btn-primary:not(:disabled):hover {
+  background: #F096AD;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,183,197,.55);
+}
+
+.btn-secondary {
+  background: var(--snow);
+  color: var(--petal-dark);
+  border: 1.5px solid var(--petal-light);
+  box-shadow: var(--shadow-sm);
+}
+.btn-secondary:not(:disabled):hover {
+  background: var(--petal-bg);
+  border-color: var(--petal);
+}
+
+.btn-mint {
+  background: var(--mint);
+  color: var(--mint-dark);
+  box-shadow: var(--shadow-mint);
+}
+.btn-mint:not(:disabled):hover {
+  background: #B2E6B8;
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-md);
+}
+.btn-ghost:not(:disabled):hover {
+  background: var(--blossom-bg);
+  color: var(--ink);
+}
+
+.btn-danger {
+  background: #FFF0F2;
+  color: var(--petal-dark);
+  border: 1px solid var(--petal-light);
+}
+.btn-danger:not(:disabled):hover { background: var(--petal-light); }
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--blossom-bg);
+  color: var(--ink-lt);
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+}
+.btn-icon:hover { background: var(--blossom); color: var(--ink-md); }
+
+/* ── INPUT ──────────────────────────────── */
+.input-base {
+  width: 100%;
+  outline: none;
+  transition: all 0.15s ease;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 16px;
+}
+.input-base::placeholder { color: var(--ink-hint); }
+.input-base:focus {
+  border-color: var(--petal);
+  background: var(--snow);
+  box-shadow: 0 0 0 3px rgba(255,183,197,.15);
+}
+
+.input-pill {
+  width: 100%;
+  outline: none;
+  transition: all 0.15s ease;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 9px 18px;
+}
+.input-pill::placeholder { color: var(--ink-hint); }
+.input-pill:focus {
+  border-color: var(--petal);
+  background: var(--snow);
+  box-shadow: 0 0 0 3px rgba(255,183,197,.15);
+}
+
+/* ── CARD ───────────────────────────────── */
+.card {
+  background: var(--snow);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+}
+.card-soft {
+  background: var(--blossom-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+.card-petal {
+  background: linear-gradient(135deg, var(--petal-bg), #FFF0F2);
+  border: 1px solid rgba(255,183,197,.25);
+  border-radius: var(--r-lg);
+}
+.card-mint {
+  background: linear-gradient(135deg, var(--mint-bg), #E6F7E8);
+  border: 1px solid rgba(213,243,216,.5);
+  border-radius: var(--r-lg);
+}
+
+/* ── BADGE ──────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+}
+.badge-petal   { background: var(--petal-light); color: var(--petal-dark); }
+.badge-mint    { background: var(--mint);         color: var(--mint-dark); }
+.badge-blossom { background: var(--blossom);      color: var(--ink-md); }
+.badge-ghost   { background: var(--blossom-bg);   color: var(--ink-lt); border: 1px solid var(--border); }
+
+/* ── CHAT BUBBLE ────────────────────────── */
+.bubble-ai {
+  background: var(--snow);
+  border: 1px solid var(--border);
+  border-radius: 4px 20px 20px 20px;
+  box-shadow: var(--shadow-md);
+  padding: 14px 18px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.75;
+}
+.bubble-user {
+  background: linear-gradient(135deg, var(--petal), #F096AD);
+  border-radius: 20px 4px 20px 20px;
+  box-shadow: var(--shadow-petal);
+  padding: 13px 18px;
+  color: white;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+/* ── CHIP ───────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 17px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--border-md);
+  background: var(--snow);
+  color: var(--ink-md);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.chip:hover {
+  border-color: var(--petal);
+  background: var(--petal-bg);
+  color: var(--petal-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── BLOB (배경 장식) ───────────────────── */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+}
+.blob-mint-lg { width: 500px; height: 400px; background: rgba(213,243,216,0.5); filter: blur(60px); }
+.blob-mint-md { width: 350px; height: 300px; background: rgba(213,243,216,0.4); filter: blur(50px); }
+.blob-pink-md { width: 300px; height: 300px; background: rgba(255,183,197,0.2); filter: blur(50px); }
+.blob-white   { width: 250px; height: 250px; background: rgba(255,255,255,0.6); filter: blur(45px); }

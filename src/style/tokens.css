@@ -1,0 +1,48 @@
+:root {
+  /* Color — Petal (체리블라썸 핑크) */
+  --petal:        #FFB7C5;
+  --petal-dark:   #D4718A;
+  --petal-light:  #FFD1DC;
+  --petal-bg:     #FFF5F7;
+
+  /* Color — Mint */
+  --mint:         #D5F3D8;
+  --mint-dark:    #68B872;
+  --mint-bg:      #F4FBF5;
+
+  /* Color — Blossom (로즈 베이지) */
+  --blossom:      #F2C7C7;
+  --blossom-bg:   #FDF8F8;
+
+  /* Color — Base */
+  --cream:        #FFF8F9;
+  --snow:         #FFFFFF;
+  --border:       rgba(242,199,199,.35);
+  --border-md:    rgba(242,199,199,.6);
+
+  /* Text */
+  --ink:          #3D2A30;
+  --ink-md:       #7A5560;
+  --ink-lt:       #B8909A;
+  --ink-hint:     #D4B0B8;
+
+  /* Radius */
+  --r-sm:   8px;
+  --r-md:   12px;
+  --r-lg:   16px;
+  --r-xl:   20px;
+  --r-pill: 9999px;
+
+  /* Shadow */
+  --shadow-sm:    0 1px 4px rgba(61,42,48,.06);
+  --shadow-md:    0 2px 12px rgba(61,42,48,.08);
+  --shadow-lg:    0 6px 24px rgba(61,42,48,.12);
+  --shadow-petal: 0 4px 16px rgba(255,183,197,.45);
+  --shadow-mint:  0 4px 16px rgba(213,243,216,.6);
+
+  /* Headline palette */
+  --brown:    #3D2A30;
+  --orange:   #C97A52;
+  --orange-l: #F5C5A8;
+  --green-d:  #4A8C44;
+}

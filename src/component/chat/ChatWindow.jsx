@@ -107,7 +107,7 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
   }, [searchIndex, searchMatches]);
 
   const handleSend = () => {
-    if (!inputText.trim() || !isLoggedIn || isLoading) return;
+    if (!inputText.trim() || isLoading) return;
     onSendMessage(inputText);
     setInputText('');
     if (taRef.current) taRef.current.style.height = 'auto';
@@ -164,7 +164,7 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
               </p>
               <div className="chat-chips">
                 {CHIPS.map(({ label, text }) => (
-                  <button key={label} className="chip" onClick={() => isLoggedIn && onSendMessage(text)}>
+                  <button key={label} className="chip" onClick={() => onSendMessage(text)}>
                     {label}
                   </button>
                 ))}
@@ -205,11 +205,11 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
               onChange={(e) => { setInputText(e.target.value); autoResize(e.target); }}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               placeholder={isLoggedIn ? '궁금한 혜택을 편하게 물어보세요...' : '로그인 후 질문하실 수 있습니다.'}
-              disabled={!isLoggedIn || isLoading}
+              disabled={isLoading}
               rows={1}
               className="chat-textarea"
             />
-            <button onClick={handleSend} disabled={!isLoggedIn || isLoading} className="chat-send-btn">
+            <button onClick={handleSend} disabled={isLoading} className="chat-send-btn">
               ↑
             </button>
           </div>

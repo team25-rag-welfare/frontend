@@ -7,9 +7,9 @@ import MiniCalendar from '../ui/MiniCalendar';
 const API_URL = import.meta.env.VITE_API_URL;
 
 const STATUS_LABEL = {
+  PLANNING: '임신 준비 중',
   PREGNANT: '임신 중',
-  POSTPARTUM: '산후',
-  PARENTING: '육아 중',
+  POSTPARTUM: '출산 후'
 };
 
 function InfoRow({ label, value, highlight }) {
@@ -48,6 +48,10 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
     messages.filter(m => m.createdAt).map(m => getDateKey(m.createdAt))
   )].reverse();
   const token = () => localStorage.getItem('access_token');
+  if (!token) {
+    alert("회원 전용 기능입니다. 로그인 하고 오십시오.");
+    return;
+  }
 
   const handleSearch = async () => {
     if (!keyword.trim()) {
@@ -69,7 +73,7 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
     }
   };
 
-  const statusLabel = STATUS_LABEL[u.pregnancyStatus] || '임신 중';
+  const statusLabel = STATUS_LABEL[u.pregnancyStatus] || '미입력';
 
   const subStatus = [
     u.pregnancyWeeks ? `${u.pregnancyWeeks}주차` : null,

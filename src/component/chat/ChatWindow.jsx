@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import Onboarding from '../Onboarding';
 import Button from '../ui/Button';
 
@@ -27,15 +28,23 @@ function highlightText(text, keyword) {
   );
 }
 
-function MessageRow({ msg, keyword }) {
+function MessageRow({ msg, keyword, onRegenerate, isLoading }) {
   const isUser = msg.senderType === 'USER';
   return (
     <div id={`msg-${msg.id}`} className={`msg-row anim-fadeup ${isUser ? 'msg-row-user' : 'msg-row-ai'}`}>
       {!isUser && <Avatar />}
       <div className={`msg-bubble-wrapper ${isUser ? 'msg-bubble-wrapper-user' : 'msg-bubble-wrapper-ai'}`}>
-        <div className={isUser ? 'bubble-user' : 'bubble-ai'} style={{ whiteSpace: 'pre-wrap' }}>
-          {highlightText(msg.content, keyword)}
+        <div className={isUser ? 'bubble-user' : 'bubble-ai'}>
+          {isUser
+            ? <span style={{ whiteSpace: 'pre-wrap' }}>{highlightText(msg.content, keyword)}</span>
+            : <div className="md-content"><ReactMarkdown>{msg.content}</ReactMarkdown></div>
+          }
         </div>
+        {!isUser && (
+          <button className="msg-regen-btn" onClick={() => onRegenerate(msg.id)} disabled={isLoading}>
+            ↺
+          </button>
+        )}
       </div>
     </div>
   );
@@ -62,9 +71,11 @@ function TypingRow() {
 const getDateKey = (dateStr) => new Date(dateStr).toISOString().slice(0, 10);
 const formatDateLabel = (dateKey) => dateKey.replace(/-/g, '.');
 
-export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, isLoading, showOnboarding, onOnboardingComplete, jumpToDate, searchMatches = [], searchKeyword = '', onClearSearch }) {
+export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, onRegenerate, isLoading, showOnboarding, onOnboardingComplete, jumpToDate, searchMatches = [], searchKeyword = '', onClearSearch, onDeleteAll, onDeleteByDate }) {
   const [inputText, setInputText] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
+  const [showDateDelete, setShowDateDelete] = useState(false);
+  const [deleteDate, setDeleteDate] = useState('');
   const scrollRef = useRef(null);
   const taRef = useRef(null);
 
@@ -98,7 +109,7 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
   }, [searchIndex, searchMatches]);
 
   const handleSend = () => {
-    if (!inputText.trim() || !isLoggedIn || isLoading) return;
+    if (!inputText.trim() || isLoading) return;
     onSendMessage(inputText);
     setInputText('');
     if (taRef.current) taRef.current.style.height = 'auto';
@@ -119,8 +130,11 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
         <span className="badge badge-ghost">
           {isLoggedIn ? `✓ 회원 / 만 ${user?.userAge ?? ''}세` : '👤 비회원'}
         </span>
-        <Button variant="danger" size="sm">대화 삭제</Button>
-      </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button variant="danger" size="sm" onClick={onDeleteAll}>대화 삭제</Button>
+          <Button variant="ghost" size="sm" onClick={() => setShowDateDelete(true)}>날짜별 삭제</Button>
+        </div>
+        </div>
 
       {/* 검색 네비바 */}
       {searchMatches.length > 0 && (
@@ -155,7 +169,7 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
               </p>
               <div className="chat-chips">
                 {CHIPS.map(({ label, text }) => (
-                  <button key={label} className="chip" onClick={() => isLoggedIn && onSendMessage(text)}>
+                  <button key={label} className="chip" onClick={() => onSendMessage(text)}>
                     {label}
                   </button>
                 ))}
@@ -176,7 +190,7 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
                     <div className="chat-date-line" />
                   </div>
                 )}
-                <MessageRow msg={msg} keyword={searchKeyword} />
+                <MessageRow msg={msg} keyword={searchKeyword} onRegenerate={onRegenerate} isLoading={isLoading} />
               </React.Fragment>
             );
           })}
@@ -185,6 +199,31 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
         </div>
       </div>
 
+      {/* 날짜별 삭제 모달 */}
+      {showDateDelete && (
+       <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ background: 'white', borderRadius: '16px', padding: '32px', width: '320px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>날짜별 대화 삭제</h3>
+          <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>삭제할 날짜를 선택해주세요.</p>
+          <input
+            type="date"
+            value={deleteDate}
+            onChange={(e) => setDeleteDate(e.target.value)}
+            style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '14px' }}
+          />
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <button onClick={() => { setShowDateDelete(false); setDeleteDate(''); }}
+              style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #ddd', cursor: 'pointer' }}>
+              취소
+            </button>
+            <button onClick={() => { onDeleteByDate(deleteDate); setShowDateDelete(false); setDeleteDate(''); }}
+              style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: '#FF8585', color: 'white', border: 'none', cursor: 'pointer' }}>
+              삭제
+            </button>
+          </div>
+        </div>
+      </div>
+    )}    
       {/* 입력 */}
       <div className="chat-input-area">
         <div className="chat-input-wrapper">
@@ -196,11 +235,11 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
               onChange={(e) => { setInputText(e.target.value); autoResize(e.target); }}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               placeholder={isLoggedIn ? '궁금한 혜택을 편하게 물어보세요...' : '로그인 후 질문하실 수 있습니다.'}
-              disabled={!isLoggedIn || isLoading}
+              disabled={isLoading}
               rows={1}
               className="chat-textarea"
             />
-            <button onClick={handleSend} disabled={!isLoggedIn || isLoading} className="chat-send-btn">
+            <button onClick={handleSend} disabled={isLoading} className="chat-send-btn">
               ↑
             </button>
           </div>

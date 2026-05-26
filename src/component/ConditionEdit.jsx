@@ -99,10 +99,10 @@ export default function ConditionEdit({ onClose, onSave }) {
 
         {/* 임신 상태 */}
         <div style={{ display: 'flex', gap: '24px', marginBottom: '28px' }}>
-          {['임신 준비 중', '임신 중', '출산 후'].map(status => (
-            <label key={status} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: pregnancyStatus === status ? '#FF8585' : '#666', fontWeight: pregnancyStatus === status ? 'bold' : 'normal' }}>
-              <input type="radio" value={status} checked={pregnancyStatus === status} onChange={() => setPregnancyStatus(status)} />
-              {status}
+          {[{ value: 'PLANNING', label: '임신 준비 중' }, { value: 'PREGNANT', label: '임신 중' }, { value: 'POSTPARTUM', label: '출산 후' }].map(({ value, label }) => (
+            <label key={value} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: pregnancyStatus === value ? '#FF8585' : '#666', fontWeight: pregnancyStatus === value ? 'bold' : 'normal' }}>
+              <input type="radio" value={value} checked={pregnancyStatus === value} onChange={() => setPregnancyStatus(value)} />
+              {label}
             </label>
           ))}
         </div>
@@ -139,7 +139,7 @@ export default function ConditionEdit({ onClose, onSave }) {
         </div>
 
         {/* 임신 중 추가 정보 */}
-        {pregnancyStatus === '임신 중' && (
+        {pregnancyStatus === 'PREGNANT' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
             {field('출산 예정일',
               <input type="date" value={formData.dueDate} onChange={e => setFormData({...formData, dueDate: e.target.value})}
@@ -154,7 +154,7 @@ export default function ConditionEdit({ onClose, onSave }) {
         )}
 
         {/* 출산 후 추가 정보 */}
-        {pregnancyStatus === '출산 후' && (
+        {pregnancyStatus === 'POSTPARTUM' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
             {field('자녀 생후 개월 수',
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

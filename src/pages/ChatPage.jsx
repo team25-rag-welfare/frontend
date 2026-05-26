@@ -193,6 +193,37 @@ export default function ChatPage() {
     }
   };
 
+  // 전체 대화 삭제
+  const handleDeleteAll = async () => {
+    if (!window.confirm('전체 대화 내용을 삭제하시겠습니까?')) return;
+    try {
+      const token = localStorage.getItem('access_token');
+      await axios.delete(`${API_URL}/api/v2/chats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages([]);
+    } catch (error) {
+     console.error('전체 삭제 실패:', error);
+     alert('삭제에 실패했습니다.');
+   }
+  };
+
+  // 날짜별 대화 삭제
+  const handleDeleteByDate = async (date) => {
+    if (!window.confirm(`${date} 대화 내용을 삭제하시겠습니까?`)) return;
+    try {
+      const token = localStorage.getItem('access_token');
+      await axios.delete(`${API_URL}/api/v2/chats/date`, {
+        params: { targetDate: date },
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setMessages(prev => prev.filter(msg => !msg.createdAt || !msg.createdAt.startsWith(date)));
+    } catch (error) {
+      console.error('날짜별 삭제 실패:', error);
+      alert('삭제에 실패했습니다.');
+    }
+  };
+
   const handleLogout = () => {
     if (window.confirm('진짜로 로그아웃 하시겠습니까?')) {
       localStorage.removeItem('access_token');
@@ -223,6 +254,8 @@ export default function ChatPage() {
         searchMatches={searchMatches}
         searchKeyword={searchKeyword}
         onClearSearch={handleClearSearch}
+        onDeleteAll={handleDeleteAll}
+        onDeleteByDate={handleDeleteByDate}
       />
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
 

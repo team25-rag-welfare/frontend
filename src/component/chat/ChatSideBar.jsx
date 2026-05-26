@@ -48,6 +48,10 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
     messages.filter(m => m.createdAt).map(m => getDateKey(m.createdAt))
   )].reverse();
   const token = () => localStorage.getItem('access_token');
+  if (!token) {
+    alert("회원 전용 기능입니다. 로그인 하고 오십시오.");
+    return;
+  }
 
   const handleSearch = async () => {
     if (!keyword.trim()) {

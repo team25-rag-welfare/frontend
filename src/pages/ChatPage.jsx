@@ -7,12 +7,13 @@ import axios from 'axios';
 import Onboarding from '../component/Onboarding';
 import ConditionEdit from '../component/ConditionEdit';
 import SettingsModal from '../component/settings/SettingsModal';
+import { escape } from 'mysql';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ChatPage() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('access_token'));
   const [user, setUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,45 +52,45 @@ export default function ChatPage() {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
+  const fetchHistory = async (token) => {
+    try {
+      const response = await fetch(`${API_URL}/api/v2/chats/history`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (!token) {
-      alert('로그인을 해주시기 바랍니다.');
-      navigate('/login');
-      return;
-    }
-
-    const fetchHistory = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/v2/chats/history`, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.status === 403) {
-          throw new Error('토큰 만료');
-        }
-
-        if (!response.ok) {
-          throw new Error('서버 에러');
-        }
-
-        const data = await response.json();
-        setMessages(data.map((msg, i) => ({ ...msg, id: msg.id ?? `loaded-${i}` })));
-      } catch (error) {
-        console.log('채팅내역 불러오기 실패:', error);
-        if (error.message === '토큰 만료') {
-          alert('로그인이 만료되었습니다. 다시 로그인 하십시오.');
-          localStorage.removeItem('access_token');
-          navigate('/login');
-        }
+      if (response.status === 403) {
+        throw new Error('토큰 만료');
       }
-    };
 
-    fetchHistory();
-    fetchProfile();
-  }, [navigate]);
+      if (!response.ok) {
+        throw new Error('서버 에러');
+      }
+
+      const data = await response.json();
+      setMessages(data.map((msg, i) => ({ ...msg, id: msg.id ?? `loaded-${i}` })));
+    } catch (error) {
+      console.log('채팅내역 불러오기 실패:', error);
+      if (error.message === '토큰 만료') {
+        alert('로그인이 만료되었습니다. 다시 로그인 하십시오.');
+        localStorage.removeItem('access_token');
+        navigate('/login');
+      }
+    }
+  };
+
+  useEffect(() =>{
+    const token = localStorage.getItem('access_token');
+    if (token){
+      fetchHistory(token);
+      fetchProfile();
+    }else{
+      console.log("DB조회 생략");
+    }
+  }, []);
+
+  
+
 
   const handleSendMessage = async (inputText) => {
     if (!inputText.trim()) return;
@@ -100,21 +101,43 @@ export default function ChatPage() {
 
     try {
       const token = localStorage.getItem('access_token');
+      let response;
 
-      const response = await axios.post(`${API_URL}/api/v2/chats/messages`,
+      if (token){
+        response = await axios.post(`${API_URL}/api/v2/chats/messages`,
         { content: inputText },
         { headers: { 'Authorization': `Bearer ${token}` } }
-      );
+        );
+      } else{
+        const recentChatsForAi = messages.slice(-2).map(msg =>({
+          role: msg.senderType === "USER" ? "human" : "assistant",
+          content: msg.content
+        }));
+
+        response = await axios.post(`${API_URL}/api/v2/chats/guest`,
+          { content: inputText },
+          { chatHistory: recentChatsForAi }
+        );
+      }
 
       const data = response.data;
 
-      const content = data.policies && data.policies.length > 0
-        ? data.policies.map(p => p.policyName ? `[${p.policyName}]\n${p.content}` : p.content).join('\n\n')
-        : '관련 정책을 찾지 못했어요.';
-
+      var content = data.policies && data.policies.length > 0 ?
+      data.policies.map(p => {
+        //policyName이 진짜 있고, 문자열 'null'도 아니고, 빈칸도 아닐 때만 true!
+        const isValidName = p.policyName && p.policyName !== 'null' && p.policyName.trim() !== '';
+        
+        return isValidName 
+            ? `[${p.policyName}]\n${p.content}` 
+            : p.content;
+    }).join('\n\n')
+    : '관련 정책을 찾지 못했어요.';
+      if (!isLoggedIn){
+        content += "\n\n로그인을 하시면 더 확실한 정보를 찾으실 수 있어요 😊";
+      }
       setMessages((prev) => [
         ...prev,
-        { id: data.messageId, senderType: data.senderType || 'ASSISTANT', content }
+        { id: data.messageId || 'guest-${Date.now()}', senderType: data.senderType || 'ASSISTANT', content }
       ]);
     } catch (error) {
       console.error('통신 에러:', error);
@@ -137,15 +160,27 @@ export default function ChatPage() {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('access_token');
+      if (!token) {
+        alert('회원 전용 기능입니다. 로그인 해주십시오.');
+        navigate('/login');
+        return;
+      }
       const response = await axios.post(
         `${API_URL}/api/v2/chats/${chatId}/regenerate`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = response.data;
-      const content = data.policies && data.policies.length > 0
-        ? data.policies.map(p => p.policyName ? `[${p.policyName}]\n${p.content}` : p.content).join('\n\n')
-        : '관련 정책을 찾지 못했어요.';
+      const content = data.policies && data.policies.length > 0 ?
+      data.policies.map(p => {
+        //policyName이 진짜 있고, 문자열 'null'도 아니고, 빈칸도 아닐 때만 true!
+        const isValidName = p.policyName && p.policyName !== 'null' && p.policyName.trim() !== '';
+        
+        return isValidName 
+            ? `[${p.policyName}]\n${p.content}` 
+            : p.content;
+    }).join('\n\n')
+    : '관련 정책을 찾지 못했어요.';
       setMessages(prev => prev.map(msg => msg.id === chatId ? { ...msg, content } : msg));
     } catch (error) {
       console.error('재생성 에러:', error);
@@ -167,7 +202,13 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
-      <ChatSidebar isLoggedIn={isLoggedIn} user={user} messages={messages} onLogout={handleLogout} onEditCondition={() => setShowConditionEdit(true)} onDateSelect={setJumpToDate} onSearch={handleSearch} onOpenSettings={() => setShowSettings(true)} />
+      <ChatSidebar isLoggedIn={isLoggedIn} user={user} messages={messages} onLogout={handleLogout} onEditCondition={() => {
+        if (!isLoggedIn){
+          alert("회원 전용 기능이므로 로그인 하고 오십시오");
+          navigate('/login');
+          return;
+        }
+        setShowConditionEdit(true)}} onDateSelect={setJumpToDate} onSearch={handleSearch} onOpenSettings={() => setShowSettings(true)} />
 
       <ChatWindow
         isLoggedIn={isLoggedIn}

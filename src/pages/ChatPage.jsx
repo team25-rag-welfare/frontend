@@ -7,7 +7,6 @@ import axios from 'axios';
 import Onboarding from '../component/Onboarding';
 import ConditionEdit from '../component/ConditionEdit';
 import SettingsModal from '../component/settings/SettingsModal';
-import { escape } from 'mysql';
 
 const API_URL = import.meta.env.VITE_API_URL;
 

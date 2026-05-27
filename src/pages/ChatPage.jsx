@@ -7,7 +7,7 @@ import axios from 'axios';
 import Onboarding from '../component/Onboarding';
 import ConditionEdit from '../component/ConditionEdit';
 import SettingsModal from '../component/settings/SettingsModal';
-import { escape } from 'mysql';
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -257,7 +257,8 @@ export default function ChatPage() {
         onDeleteAll={handleDeleteAll}
         onDeleteByDate={handleDeleteByDate}
       />
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} onProfileUpdate={fetchProfile} />}
 
       {showConditionEdit && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

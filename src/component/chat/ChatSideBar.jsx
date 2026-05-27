@@ -121,6 +121,52 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
       </div>
 
       <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px 16px', position: 'relative', zIndex: 1 }}>
+        {/* 프로필 카드 영역 */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.65)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          padding: '12px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '16px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)'
+        }}>
+          <div style={{
+            width: '46px',
+            height: '46px',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '2px solid white',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#FFEBF0',
+            flexShrink: 0
+          }}>
+            {u.profileImageUrl ? (
+              <img 
+                src={u.profileImageUrl} 
+                alt="프로필" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <span style={{ fontSize: '20px' }}>👶</span>
+            )}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
+            <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--ink)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+              {u.userName || '반가워요!'}
+            </span>
+            <span style={{ fontSize: '11px', color: 'var(--ink-lt)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+              #{u.userId ? u.userId : '비회원'}
+            </span>
+          </div>
+        </div>
+
         <div style={{ marginBottom: 10 }}>
           <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>내 조건</span>
         </div>

@@ -7,7 +7,6 @@ import ChatPage from '../pages/ChatPage.jsx';
 import Login from '../pages/Login.jsx';
 import Onboarding from '../component/Onboarding.jsx';
 
-
 function Router() {
   return (
     <BrowserRouter>
@@ -20,7 +19,6 @@ function Router() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path='/test-chat' element={<ChatPage />} />
         <Route path="*" element={<NotFound />} />
-        
       </Routes>
     </BrowserRouter>
   );

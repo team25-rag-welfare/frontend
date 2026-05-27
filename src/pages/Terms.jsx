@@ -22,7 +22,7 @@ const Terms = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      navigate('/onboarding');
+      navigate('/chat');
     } catch (error) {
       console.error('약관 동의 실패:', error);
       alert('약관 동의 처리에 실패했습니다. 다시 시도해주세요.');

@@ -123,6 +123,20 @@ export default function ChatSidebar({ isLoggedIn, user, messages = [], onLogout,
       </div>
 
       <div className="sidebar-body chat-scroll">
+        <div className="sidebar-profile-card">
+          <div className="sidebar-profile-avatar">
+            {u.profileImageUrl ? (
+              <img src={u.profileImageUrl} alt="프로필" className="sidebar-profile-img" />
+            ) : (
+              <span className="sidebar-profile-emoji">👶</span>
+            )}
+          </div>
+          <div className="sidebar-profile-info">
+            <span className="sidebar-profile-name">{u.userName || '반가워요!'}</span>
+            <span className="sidebar-profile-id">#{u.userId ? u.userId : '비회원'}</span>
+          </div>
+        </div>
+
         <p className="sidebar-section-title">내 조건</p>
 
         <div className="sidebar-status">

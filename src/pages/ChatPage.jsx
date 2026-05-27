@@ -262,7 +262,8 @@ export default function ChatPage() {
         onDeleteAll={handleDeleteAll}
         onDeleteByDate={handleDeleteByDate}
       />
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} onProfileUpdate={fetchProfile} />}
 
       {showConditionEdit && (
         <div className="condition-edit-overlay">

@@ -1,10 +1,77 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import Button from './ui/Button';
+import Dropdown from './ui/Dropdown';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const DISTRICTS = [
+  '강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구',
+  '노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구',
+  '성동구','성북구','송파구','양천구','영등포구','용산구','은평구',
+  '종로구','중구','중랑구',
+];
+
+const PREGNANCY_OPTIONS = [
+  { value: 'PLANNING', label: '임신 준비 중' },
+  { value: 'PREGNANT', label: '임신 중' },
+  { value: 'POSTPARTUM', label: '출산 후' },
+];
+
+const CHILD_COUNT_OPTIONS = [0,1,2,3,4].map(n => ({ value: n, label: `${n}명` })).concat({ value: 5, label: '5명+' });
+
+function Stepper({ value, onChange, min = 0, max = 999, unit }) {
+  const num = value === '' ? '' : Number(value);
+  const dec = () => { if (num !== '' && num > min) onChange(num - 1); };
+  const inc = () => { if (num === '' || num < max) onChange(num === '' ? min : num + 1); };
+  return (
+    <div className="with-unit">
+      <div className="stepper">
+        <button type="button" onClick={dec} className="stepper-btn">−</button>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value}
+          onChange={e => {
+            const v = e.target.value.replace(/[^0-9]/g, '');
+            onChange(v === '' ? '' : Number(v));
+          }}
+          className="stepper-input"
+        />
+        <button type="button" onClick={inc} className="stepper-btn">+</button>
+      </div>
+      {unit && <span className="unit-label">{unit}</span>}
+    </div>
+  );
+}
+
+function ChipSelect({ options, value, onChange }) {
+  return (
+    <div className="chip-select">
+      {options.map(opt => {
+        const active = String(value) === String(opt.value);
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={`chip-option${active ? ' active' : ''}`}
+          >{opt.label}</button>
+        );
+      })}
+    </div>
+  );
+}
+
+const STEPS = [
+  { label: '현재 상태를 알려주세요' },
+  { label: '만 나이를 알려주세요' },
+  { label: '거주중인 자치구를 알려주세요' },
+  { label: '자녀 수를 알려주세요' },
+];
+
 export default function Onboarding({ onClose }) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
     pregnancyStatus: '',
     userAge: '',
@@ -12,148 +79,98 @@ export default function Onboarding({ onClose }) {
     childCount: '',
   });
 
+  const set = (key, val) => setFormData(prev => ({ ...prev, [key]: val }));
+
   const handleNext = () => {
-  if (step === 1 && !formData.pregnancyStatus) {
-    alert('현재 상태를 선택해주세요!');
-    return;
-  }
-  if (step === 2 && !formData.userAge) {
-    alert('만 나이를 입력해주세요!');
-    return;
-  }
-  if (step === 3 && !formData.district) {
-    alert('거주 구를 선택해주세요!');
-    return;
-  }
-  setStep((prev) => prev + 1);
-};
-  const handlePrev = () => setStep((prev) => prev - 1);
+    if (step === 0 && !formData.pregnancyStatus) { alert('현재 상태를 선택해주세요!'); return; }
+    if (step === 1 && formData.userAge === '') { alert('만 나이를 입력해주세요!'); return; }
+    if (step === 2 && !formData.district) { alert('거주 구를 선택해주세요!'); return; }
+    setStep(prev => prev + 1);
+  };
 
   const handleSubmit = async () => {
-    if (!formData.childCount && formData.childCount !== 0) {
-    alert('자녀 수를 입력해주세요!');
-    return;
-  }
-  const token = localStorage.getItem('access_token');
-  
-  try {
-    if (token) {
-      // 회원이면 API에 저장
-      await axios.post(`${API_URL}/api/v1/profile/onboarding`, {
-        pregnancyStatus: formData.pregnancyStatus,
-        userAge: parseInt(formData.userAge),
-        district: formData.district,
-        childCount: parseInt(formData.childCount),
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+    if (formData.childCount === '') { alert('자녀 수를 입력해주세요!'); return; }
+    const token = localStorage.getItem('access_token');
+    try {
+      if (token) {
+        await axios.post(`${API_URL}/api/v1/profile/onboarding`, {
+          pregnancyStatus: formData.pregnancyStatus,
+          userAge: parseInt(formData.userAge),
+          district: formData.district,
+          childCount: parseInt(formData.childCount),
+        }, { headers: { Authorization: `Bearer ${token}` } });
+      }
+      onClose();
+    } catch {
+      onClose();
     }
-    onClose();
-  } catch (error) {
-    onClose(); // 실패해도 일단 닫기
-  }
-};
+  };
+
+  const isLast = step === STEPS.length - 1;
 
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px'
-    }}>
-      <div style={{
-        backgroundColor: '#FFE4E8', borderRadius: '20px',
-        padding: '40px', width: '400px', position: 'relative'
-      }}>
-        <p style={{ color: '#FF8585', fontWeight: 'bold', marginBottom: '8px' }}>
-          기본 정보를 알려주세요 ({step}/4)
-        </p>
+    <div className="onboarding-wrap">
+      <div className="condition-modal onboarding-card">
 
-        {step === 1 && (
-          <div>
-            <p style={{ marginBottom: '16px' }}>현재 상태</p>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              {['임신중', '출산 후', '태담 입문'].map((status) => (
+        {/* 헤더 */}
+        <div className="condition-header">
+          <div className="condition-header-text">
+            <p>기본 정보 입력</p>
+            <h2>{STEPS[step].label}</h2>
+          </div>
+          <div className="onboarding-step-badge">{step + 1} / {STEPS.length}</div>
+        </div>
+
+        {/* 진행 바 */}
+        <div className="onboarding-progress-track">
+          <div className="onboarding-progress-fill" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
+        </div>
+
+        {/* 스텝 내용 */}
+        <div className="onboarding-body">
+          {step === 0 && (
+            <div className="pregnancy-tabs">
+              {PREGNANCY_OPTIONS.map(({ value, label }) => (
                 <button
-                  key={status}
-                  onClick={() => setFormData({ ...formData, pregnancyStatus: status })}
-                  style={{
-                    padding: '10px 16px', borderRadius: '10px', border: '2px solid',
-                    borderColor: formData.pregnancyStatus === status ? '#FF8585' : '#ddd',
-                    backgroundColor: formData.pregnancyStatus === status ? '#FF8585' : 'white',
-                    color: formData.pregnancyStatus === status ? 'white' : '#555',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {status}
-                </button>
+                  key={value}
+                  onClick={() => set('pregnancyStatus', value)}
+                  className={`pregnancy-tab${formData.pregnancyStatus === value ? ' active' : ''}`}
+                >{label}</button>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {step === 2 && (
-          <div>
-            <p style={{ marginBottom: '16px' }}>만 나이를 입력해 주세요</p>
-            <input
-              type="number"
-              value={formData.userAge}
-              onChange={(e) => setFormData({ ...formData, userAge: e.target.value })}
-              placeholder="나이 입력"
-              style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', width: '100%' }}
-            />
-          </div>
-        )}
+          {step === 1 && (
+            <Stepper value={formData.userAge} onChange={v => set('userAge', v)} min={0} max={100} unit="세" />
+          )}
 
-        {step === 3 && (
-          <div>
-            <p style={{ marginBottom: '16px' }}>현재 거주중인 구를 알려주세요</p>
-            <select
+          {step === 2 && (
+            <Dropdown
+              options={DISTRICTS.map(gu => ({ value: gu, label: gu }))}
               value={formData.district}
-              onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-              style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', width: '100%' }}
-            >
-              <option value="">선택해주세요</option>
-              {['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구',
-                '노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구',
-                '성동구','성북구','송파구','양천구','영등포구','용산구','은평구',
-                '종로구','중구','중랑구'].map((gu) => (
-                <option key={gu} value={gu}>{gu}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div>
-            <p style={{ marginBottom: '16px' }}>현재 자녀의 수를 알려주세요</p>
-            <input
-              type="number"
-              value={formData.childCount}
-              onChange={(e) => setFormData({ ...formData, childCount: e.target.value })}
-              placeholder="자녀 수 입력"
-              style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', width: '100%' }}
+              onChange={v => set('district', v)}
             />
-          </div>
-        )}
+          )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '24px' }}>
-          {step > 1 && (
-            <button onClick={handlePrev} style={{ padding: '10px 20px', borderRadius: '10px', border: '1px solid #ddd', cursor: 'pointer' }}>
-              이전
-            </button>
+          {step === 3 && (
+            <ChipSelect
+              options={CHILD_COUNT_OPTIONS}
+              value={formData.childCount}
+              onChange={v => set('childCount', v)}
+            />
           )}
-          {step < 4 ? (
-            <button onClick={handleNext} style={{ marginLeft: 'auto', padding: '10px 20px', borderRadius: '10px', backgroundColor: '#FF8585', color: 'white', border: 'none', cursor: 'pointer' }}>
-              다음
-            </button>
-          ) : (
-            <button onClick={handleSubmit} style={{ marginLeft: 'auto', padding: '10px 20px', borderRadius: '10px', backgroundColor: '#FF8585', color: 'white', border: 'none', cursor: 'pointer' }}>
-              완료
-            </button>
-          )}
+        </div>
+
+        {/* 하단 버튼 */}
+        <div className="condition-footer">
+          {step > 0
+            ? <Button variant="secondary" size="md" onClick={() => setStep(p => p - 1)} style={{ flex: 1 }}>이전</Button>
+            : <div style={{ flex: 1 }} />
+          }
+          {isLast
+            ? <Button variant="primary" size="md" onClick={handleSubmit} style={{ flex: 1 }}>완료</Button>
+            : <Button variant="primary" size="md" onClick={handleNext} style={{ flex: 1 }}>다음</Button>
+          }
         </div>
       </div>
     </div>

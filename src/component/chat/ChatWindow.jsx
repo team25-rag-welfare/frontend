@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import Onboarding from '../Onboarding';
 import Button from '../ui/Button';
+import DeleteCalendar from '../ui/DeleteCalendar';
 
 const CHIPS = [
   { label: '🤰 임신 중 혜택',    text: '임신 중에 받을 수 있는 혜택이 뭐가 있나요?' },
@@ -18,14 +20,49 @@ function Avatar() {
   );
 }
 
-function highlightText(text, keyword) {
+const HIGHLIGHT_STYLE = {
+  background: 'var(--petal-light)',
+  color: 'var(--petal-dark)',
+  borderRadius: 3,
+  padding: '0 2px',
+  fontWeight: 700,
+};
+
+function splitHighlight(text, keyword) {
   if (!keyword) return text;
   const parts = text.split(new RegExp(`(${keyword})`, 'gi'));
   return parts.map((part, i) =>
     part.toLowerCase() === keyword.toLowerCase()
-      ? <mark key={i} style={{ background: '#FFE066', borderRadius: 2, padding: '0 1px' }}>{part}</mark>
+      ? <mark key={i} style={HIGHLIGHT_STYLE}>{part}</mark>
       : part
   );
+}
+
+function applyHighlight(node, keyword) {
+  if (!keyword) return node;
+  if (typeof node === 'string') {
+    const parts = node.split(new RegExp(`(${keyword})`, 'gi'));
+    if (parts.length === 1) return node;
+    return parts.map((part, i) =>
+      part.toLowerCase() === keyword.toLowerCase()
+        ? <mark key={i} style={HIGHLIGHT_STYLE}>{part}</mark>
+        : part
+    );
+  }
+  if (Array.isArray(node)) return node.map((child) => applyHighlight(child, keyword));
+  if (React.isValidElement(node) && node.props.children) {
+    return React.cloneElement(node, { key: node.key }, applyHighlight(node.props.children, keyword));
+  }
+  return node;
+}
+
+function mdComponents(keyword) {
+  const wrap = (Tag) => ({ children, ...props }) => <Tag {...props}>{applyHighlight(children, keyword)}</Tag>;
+  return {
+    p: wrap('p'), li: wrap('li'), td: wrap('td'), th: wrap('th'),
+    h1: wrap('h1'), h2: wrap('h2'), h3: wrap('h3'),
+    strong: wrap('strong'), em: wrap('em'),
+  };
 }
 
 function MessageRow({ msg, keyword, onRegenerate, isLoading }) {
@@ -36,8 +73,8 @@ function MessageRow({ msg, keyword, onRegenerate, isLoading }) {
       <div className={`msg-bubble-wrapper ${isUser ? 'msg-bubble-wrapper-user' : 'msg-bubble-wrapper-ai'}`}>
         <div className={isUser ? 'bubble-user' : 'bubble-ai'}>
           {isUser
-            ? <span style={{ whiteSpace: 'pre-wrap' }}>{highlightText(msg.content, keyword)}</span>
-            : <div className="md-content"><ReactMarkdown>{msg.content}</ReactMarkdown></div>
+            ? <span style={{ whiteSpace: 'pre-wrap' }}>{splitHighlight(msg.content, keyword)}</span>
+            : <div className="md-content"><ReactMarkdown remarkPlugins={[remarkBreaks]} components={mdComponents(keyword)}>{msg.content}</ReactMarkdown></div>
           }
         </div>
         {!isUser && (
@@ -74,10 +111,12 @@ const formatDateLabel = (dateKey) => dateKey.replace(/-/g, '.');
 export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, onRegenerate, isLoading, showOnboarding, onOnboardingComplete, jumpToDate, searchMatches = [], searchKeyword = '', onClearSearch, onDeleteAll, onDeleteByDate }) {
   const [inputText, setInputText] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [showDateDelete, setShowDateDelete] = useState(false);
-  const [deleteDate, setDeleteDate] = useState('');
   const scrollRef = useRef(null);
   const taRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -93,6 +132,16 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
   }, [jumpToDate]);
 
   useEffect(() => { setSearchIndex(0); }, [searchMatches]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && taRef.current) taRef.current.focus();
@@ -130,11 +179,31 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
         <span className="badge badge-ghost">
           {isLoggedIn ? `✓ 회원 / 만 ${user?.userAge ?? ''}세` : '👤 비회원'}
         </span>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Button variant="danger" size="sm" onClick={onDeleteAll}>대화 삭제</Button>
-          <Button variant="ghost" size="sm" onClick={() => setShowDateDelete(true)}>날짜별 삭제</Button>
+
+        {/* 대화 삭제 드롭다운 */}
+        <div ref={dropdownRef} className="chat-delete-dropdown">
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => setShowDropdown(v => !v)}
+          >
+            대화 삭제 ▾
+          </Button>
+          {showDropdown && (
+            <div className="chat-delete-dropdown-list">
+              <button
+                className="chat-delete-dropdown-item"
+                onClick={() => { setShowDropdown(false); setShowDeleteAllModal(true); }}
+              >전체 삭제</button>
+              <div className="chat-delete-dropdown-divider" />
+              <button
+                className="chat-delete-dropdown-item"
+                onClick={() => { setShowDropdown(false); setShowDateDelete(true); }}
+              >날짜별 삭제</button>
+            </div>
+          )}
         </div>
-        </div>
+      </div>
 
       {/* 검색 네비바 */}
       {searchMatches.length > 0 && (
@@ -199,49 +268,56 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
         </div>
       </div>
 
-      {/* 날짜별 삭제 모달 */}
-      {showDateDelete && (
-       <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ background: 'white', borderRadius: '16px', padding: '32px', width: '320px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>날짜별 대화 삭제</h3>
-          <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>삭제할 날짜를 선택해주세요.</p>
-          <input
-            type="date"
-            value={deleteDate}
-            onChange={(e) => setDeleteDate(e.target.value)}
-            style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '14px' }}
-          />
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button onClick={() => { setShowDateDelete(false); setDeleteDate(''); }}
-              style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #ddd', cursor: 'pointer' }}>
-              취소
-            </button>
-            <button onClick={() => { onDeleteByDate(deleteDate); setShowDateDelete(false); setDeleteDate(''); }}
-              style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: '#FF8585', color: 'white', border: 'none', cursor: 'pointer' }}>
-              삭제
-            </button>
+      {/* 전체 삭제 확인 모달 */}
+      {showDeleteAllModal && (
+        <div className="modal-overlay">
+          <div className="modal-card delete-all-modal">
+            <div className="delete-all-modal-icon">🗑️</div>
+            <div>
+              <h2>전체 대화 삭제</h2>
+              <p>
+                지금까지의 모든 대화 내용이<br />
+                <span className="delete-all-modal-highlight">영구적으로 삭제</span>됩니다.<br />
+                이 작업은 되돌릴 수 없습니다.
+              </p>
+            </div>
+            <div className="delete-all-modal-btns">
+              <Button variant="secondary" size="md" onClick={() => setShowDeleteAllModal(false)} style={{ flex: 1 }}>취소</Button>
+              <Button variant="primary" size="md" onClick={() => { setShowDeleteAllModal(false); onDeleteAll(); }} style={{ flex: 1 }}>삭제</Button>
+            </div>
           </div>
         </div>
-      </div>
-    )}    
+      )}
+
+      {/* 날짜별 삭제 모달 */}
+      {showDateDelete && (
+        <DeleteCalendar
+          activeDates={[...new Set(messages.filter(m => m.createdAt).map(m => getDateKey(m.createdAt)))]}
+          onConfirm={onDeleteByDate}
+          onClose={() => setShowDateDelete(false)}
+        />
+      )}
+
       {/* 입력 */}
       <div className="chat-input-area">
         <div className="chat-input-wrapper">
-          <img src="/dog.png" alt="" className="chat-mascot" />
-          <div className="chat-input-box">
-            <textarea
-              ref={taRef}
-              value={inputText}
-              onChange={(e) => { setInputText(e.target.value); autoResize(e.target); }}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              placeholder={isLoggedIn ? '궁금한 혜택을 편하게 물어보세요...' : '로그인 후 질문하실 수 있습니다.'}
-              disabled={isLoading}
-              rows={1}
-              className="chat-textarea"
-            />
-            <button onClick={handleSend} disabled={isLoading} className="chat-send-btn">
-              ↑
-            </button>
+          <div className="chat-input-row">
+            <img src="/dog.png" alt="" className="chat-mascot" />
+            <div className="chat-input-box">
+              <textarea
+                ref={taRef}
+                value={inputText}
+                onChange={(e) => { setInputText(e.target.value); autoResize(e.target); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                placeholder='궁금한 혜택을 물어보세요'
+                disabled={isLoading}
+                rows={1}
+                className="chat-textarea"
+              />
+              <button onClick={handleSend} disabled={isLoading} className="chat-send-btn">
+                ↑
+              </button>
+            </div>
           </div>
           <p className="chat-footer-text">
             산책은 공식 정부 복지 정책 기반으로 안내드립니다 · 최종 확인은 관련 기관에 문의하세요

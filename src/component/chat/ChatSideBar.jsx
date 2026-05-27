@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -14,9 +15,9 @@ const STATUS_LABEL = {
 
 function InfoRow({ label, value, highlight }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0' }}>
-      <span style={{ fontSize: 13, color: 'var(--ink-lt)' }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 700, color: highlight ? 'var(--petal-dark)' : 'var(--ink-lt)' }}>
+    <div className="info-row">
+      <span className="info-row-label">{label}</span>
+      <span className={`info-row-value${highlight ? ' highlight' : ''}`}>
         {value ?? '미입력'}
       </span>
     </div>
@@ -25,7 +26,8 @@ function InfoRow({ label, value, highlight }) {
 
 const getDateKey = (dateStr) => new Date(dateStr).toISOString().slice(0, 10);
 
-export default function ChatSidebar({ user, messages = [], onLogout, onEditCondition, onDateSelect, onSearch, onOpenSettings }) {
+export default function ChatSidebar({ isLoggedIn, user, messages = [], onLogout, onEditCondition, onDateSelect, onSearch, onOpenSettings }) {
+  const navigate = useNavigate();
   const u = user || {
     userName: null,
     userAge: null,
@@ -83,15 +85,15 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
     .join(' · ');
 
   return (
-    <div style={{ width: 280, display: 'flex', flexDirection: 'column', background: 'var(--petal-bg)', borderRight: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
+    <div className="sidebar">
 
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <img src="/logo.png" alt="산책" style={{ height: 88, display: 'block' }} />
+      <div className="sidebar-logo-area">
+        <img src="/logo.png" alt="산책" onClick={() => navigate('/')} className="sidebar-logo" />
       </div>
 
-      <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid var(--border)', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
+      <div className="sidebar-search-area">
+        <div className="sidebar-search-row">
+          <div className="sidebar-search-input-wrap">
             <Input
               shape="pill"
               value={keyword}
@@ -100,13 +102,13 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
               placeholder="내 대화 기록 찾기"
               style={{ paddingRight: 36, fontSize: 12 }}
             />
-            <button onClick={handleSearch} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--ink-lt)', fontSize: 13 }}>
+            <button onClick={handleSearch} className="sidebar-search-btn">
               🔍
             </button>
           </div>
           <button
             onClick={() => setShowCalendar(v => !v)}
-            style={{ flexShrink: 0, border: '1.5px solid var(--border)', background: showCalendar ? 'var(--petal-bg)' : 'var(--cream)', borderRadius: 'var(--r-pill)', padding: '6px 10px', cursor: 'pointer', fontSize: 14, transition: 'all .15s' }}
+            className={`sidebar-cal-btn${showCalendar ? ' active' : ''}`}
           >
             📅
           </button>
@@ -120,20 +122,18 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
         )}
       </div>
 
-      <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px 16px', position: 'relative', zIndex: 1 }}>
-        <div style={{ marginBottom: 10 }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>내 조건</span>
-        </div>
+      <div className="sidebar-body chat-scroll">
+        <p className="sidebar-section-title">내 조건</p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--petal)', flexShrink: 0 }} />
+        <div className="sidebar-status">
+          <span className="sidebar-status-dot" />
           <div>
-            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>{statusLabel}</p>
-            {subStatus && <p style={{ fontSize: 12, color: 'var(--ink-lt)' }}>{subStatus}</p>}
+            <p className="sidebar-status-label">{statusLabel}</p>
+            {subStatus && <p className="sidebar-status-sub">{subStatus}</p>}
           </div>
         </div>
 
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginBottom: 12 }}>
+        <div className="sidebar-info-list">
           <InfoRow label="거주지" value={u.district ?? null} highlight={u.district != null} />
           <InfoRow label="만 나이" value={u.userAge != null ? `${u.userAge}세` : null} highlight={u.userAge != null} />
           <InfoRow label="자녀 수" value={u.childCount != null ? `${u.childCount}명` : null} highlight={u.childCount != null} />
@@ -145,10 +145,10 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
         </div>
       </div>
 
-      <div style={{ padding: '12px 16px 20px', borderTop: '1px solid var(--border)', position: 'relative', zIndex: 1 }}>
-        <div className="card-petal" style={{ padding: '12px 14px', marginBottom: 12 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>내 복지 조건</p>
-          <p style={{ fontSize: 12, color: 'var(--ink-md)', lineHeight: 1.6, marginBottom: 10 }}>
+      <div className="sidebar-footer">
+        <div className="card-petal sidebar-card">
+          <p className="sidebar-card-title">내 복지 조건</p>
+          <p className="sidebar-card-desc">
             조건을 업데이트하면
             <br />
             더 정확한 혜택을 찾아드려요!
@@ -158,11 +158,12 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
           </Button>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8 }}>
-          <button onClick={onLogout} style={{ fontSize: 12, color: 'var(--ink-hint)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
-            로그아웃
-          </button>
-          <button onClick={onOpenSettings} style={{ border: 'none', background: 'none', fontSize: 20, color: 'var(--ink-lt)', cursor: 'pointer' }}>
+        <div className="sidebar-actions">
+          {isLoggedIn
+            ? <button onClick={onLogout} className="sidebar-logout-btn">로그아웃</button>
+            : <button onClick={() => navigate('/login')} className="sidebar-login-btn">로그인</button>
+          }
+          <button onClick={onOpenSettings} className="sidebar-settings-btn">
             ⚙️
           </button>
         </div>

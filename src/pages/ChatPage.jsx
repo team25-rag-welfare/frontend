@@ -7,6 +7,8 @@ import axios from 'axios';
 import Onboarding from '../component/Onboarding';
 import ConditionEdit from '../component/ConditionEdit';
 import SettingsModal from '../component/settings/SettingsModal';
+import Toast from '../component/ui/Toast';
+import Button from '../component/ui/Button';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -22,6 +24,10 @@ export default function ChatPage() {
   const [jumpToDate, setJumpToDate] = useState(null);
   const [searchMatches, setSearchMatches] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [loginToast, setLoginToast] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const showLoginToast = () => setLoginToast(true);
 
   const handleSearch = (ids, keyword) => {
     setSearchMatches(ids);
@@ -160,8 +166,8 @@ export default function ChatPage() {
     try {
       const token = localStorage.getItem('access_token');
       if (!token) {
-        alert('회원 전용 기능입니다. 로그인 해주십시오.');
-        navigate('/login');
+        showLoginToast();
+        setIsLoading(false);
         return;
       }
       const response = await axios.post(
@@ -194,7 +200,6 @@ export default function ChatPage() {
 
   // 전체 대화 삭제
   const handleDeleteAll = async () => {
-    if (!window.confirm('전체 대화 내용을 삭제하시겠습니까?')) return;
     try {
       const token = localStorage.getItem('access_token');
       await axios.delete(`${API_URL}/api/v2/chats`, {
@@ -209,7 +214,6 @@ export default function ChatPage() {
 
   // 날짜별 대화 삭제
   const handleDeleteByDate = async (date) => {
-    if (!window.confirm(`${date} 대화 내용을 삭제하시겠습니까?`)) return;
     try {
       const token = localStorage.getItem('access_token');
       await axios.delete(`${API_URL}/api/v2/chats/date`, {
@@ -223,22 +227,24 @@ export default function ChatPage() {
     }
   };
 
-  const handleLogout = () => {
-    if (window.confirm('진짜로 로그아웃 하시겠습니까?')) {
-      localStorage.removeItem('access_token');
-      navigate('/');
-    }
+  const handleLogout = () => setShowLogoutModal(true);
+
+  const confirmLogout = () => {
+    localStorage.removeItem('access_token');
+    navigate('/');
   };
 
   return (
     <div className="flex h-screen w-full bg-gray-50">
       <ChatSidebar isLoggedIn={isLoggedIn} user={user} messages={messages} onLogout={handleLogout} onEditCondition={() => {
         if (!isLoggedIn){
-          alert("회원 전용 기능이므로 로그인 하고 오십시오");
-          navigate('/login');
+          showLoginToast();
           return;
         }
-        setShowConditionEdit(true)}} onDateSelect={setJumpToDate} onSearch={handleSearch} onOpenSettings={() => setShowSettings(true)} />
+        setShowConditionEdit(true)}} onDateSelect={setJumpToDate} onSearch={handleSearch} onOpenSettings={() => {
+          if (!isLoggedIn) { showLoginToast(); return; }
+          setShowSettings(true);
+        }} />
 
       <ChatWindow
         isLoggedIn={isLoggedIn}
@@ -259,9 +265,33 @@ export default function ChatPage() {
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
 
       {showConditionEdit && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="condition-edit-overlay">
           <ConditionEdit onClose={() => setShowConditionEdit(false)} onSave={fetchProfile} />
         </div>
+      )}
+
+      {showLogoutModal && (
+        <div className="modal-overlay">
+          <div className="modal-card logout-modal">
+            <div className="logout-modal-icon">👋</div>
+            <div>
+              <h2>로그아웃 할까요?</h2>
+              <p>언제든지 다시 돌아오세요 😊</p>
+            </div>
+            <div className="logout-modal-btns">
+              <Button variant="secondary" size="md" onClick={() => setShowLogoutModal(false)} style={{ flex: 1 }}>취소</Button>
+              <Button variant="primary" size="md" onClick={confirmLogout} style={{ flex: 1 }}>로그아웃</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loginToast && (
+        <Toast
+          message="로그인이 필요한 기능이에요"
+          onLogin={() => { setLoginToast(false); navigate('/login'); }}
+          onClose={() => setLoginToast(false)}
+        />
       )}
     </div>
   );

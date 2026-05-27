@@ -11,6 +11,7 @@ export default function MemoryTab() {
   const token = () => localStorage.getItem('access_token');
 
   useEffect(() => {
+    if (!token()) return;
     const fetchMemories = async () => {
       setIsLoading(true);
       try {
@@ -20,7 +21,6 @@ export default function MemoryTab() {
         setMemories(res.data);
       } catch (error) {
         console.error('메모리 조회 실패:', error);
-        alert('메모리를 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
       }

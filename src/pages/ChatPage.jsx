@@ -258,7 +258,7 @@ export default function ChatPage() {
         onDeleteByDate={handleDeleteByDate}
       />
 
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} onProfileUpdate={fetchProfile} />}
 
       {showConditionEdit && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

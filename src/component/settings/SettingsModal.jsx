@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MemoryTab from './MemoryTab';
@@ -11,13 +11,17 @@ const TABS = [
   { key: 'memory', label: '메모리' },
 ];
 
-export default function SettingsModal({ onClose }) {
+export default function SettingsModal({ onClose, onProfileUpdate }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('account');
   const [userInfo, setUserInfo] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // 모달이 열리면 유저 정보 조회
   useEffect(() => {
@@ -39,6 +43,52 @@ export default function SettingsModal({ onClose }) {
     };
     fetchUserInfo();
   }, []);
+
+  const handleAvatarClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드할 수 있습니다.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('파일 크기는 최대 5MB까지 가능합니다.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setIsUploading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await axios.post(`${API_URL}/api/v1/profile/image`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const newImageUrl = response.data;
+      setUserInfo((prev) => ({ ...prev, profileImageUrl: newImageUrl }));
+      alert('프로필 사진이 성공적으로 등록되었습니다.');
+      if (onProfileUpdate) {
+        onProfileUpdate();
+      }
+    } catch (error) {
+      console.error('프로필 사진 업로드 실패:', error);
+      alert('프로필 사진 업로드 중 오류가 발생했습니다.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // 회원 탈퇴 API 호출
   const handleWithdrawal = async () => {
@@ -118,6 +168,80 @@ export default function SettingsModal({ onClose }) {
                   </div>
                 ) : (
                   <>
+                    {/* 프로필 이미지 업로드 영역 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '20px', borderBottom: '1px dashed var(--border)', marginBottom: '8px' }}>
+                      <div 
+                        onClick={handleAvatarClick}
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                        style={{
+                          width: '80px',
+                          height: '80px',
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          cursor: 'pointer',
+                          border: '3px solid white',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#FFF0F2',
+                          transition: 'all 0.3s ease',
+                          flexShrink: 0
+                        }}
+                      >
+                        {userInfo?.profileImageUrl ? (
+                          <img 
+                            src={userInfo.profileImageUrl} 
+                            alt="프로필 이미지" 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: '32px' }}>👶</span>
+                        )}
+                        
+                        {(isHovered || isUploading) && (
+                          <div style={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: 'rgba(0, 0, 0, 0.4)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontSize: '10px',
+                            fontWeight: 'bold',
+                          }}>
+                            {isUploading ? (
+                              <span>업로드 중</span>
+                            ) : (
+                              <>
+                                <span style={{ fontSize: '14px', marginBottom: '2px' }}>📷</span>
+                                <span>사진 변경</span>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 900, color: 'var(--ink)' }}>프로필 사진 등록</span>
+                        <span style={{ fontSize: '12px', color: 'var(--ink-lt)', lineHeight: 1.4 }}>
+                          둥근 사진 영역을 클릭해서 프로필 이미지를 등록해 주세요.<br/>
+                          (5MB 이하의 이미지 파일만 등록할 수 있습니다.)
+                        </span>
+                      </div>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleFileChange} 
+                        style={{ display: 'none' }} 
+                        accept="image/*"
+                      />
+                    </div>
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                         <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--ink-lt)', width: '90px' }}>사용자 이름</span>

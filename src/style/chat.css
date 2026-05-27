@@ -69,10 +69,10 @@
 }
 
 .chat-messages {
-  max-width: 1000px;
+  max-width: 860px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -191,18 +191,25 @@
 .msg-regen-btn {
   margin-top: 6px;
   border: 1px solid var(--border);
-  background: var(--cream);
-  font-size: 13px;
+  background: var(--snow);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
   color: var(--ink-lt);
   cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 8px;
-  transition: all .2s;
+  opacity: 0;
+  transition: opacity .2s, background .15s, transform .2s;
   align-self: flex-start;
+  flex-shrink: 0;
 }
 
-.msg-regen-btn:hover { background: var(--border); color: var(--ink-lt); }
-.msg-regen-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.msg-row-ai:hover .msg-regen-btn { opacity: 1; }
+.msg-regen-btn:hover { background: var(--petal-bg); color: var(--petal-dark); border-color: var(--petal-light); transform: rotate(-30deg); }
+.msg-regen-btn:disabled { opacity: 0 !important; cursor: not-allowed; }
 
 /* ── 타이핑 ─────────────────────────────── */
 .typing-row {
@@ -233,24 +240,30 @@
 
 /* ── 입력 영역 ───────────────────────────── */
 .chat-input-area {
-  padding: 12px 32px 20px;
+  padding: 8px 0 14px;
   background: transparent;
   flex-shrink: 0;
 }
 
 .chat-input-wrapper {
-  max-width: 1000px;
+  max-width: 860px;
   width: 100%;
   margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+}
+
+.chat-input-row {
   position: relative;
 }
 
 .chat-mascot {
   position: absolute;
-  left: 12px;
-  bottom: calc(100% - 16px);
-  width: 96px;
-  height: 96px;
+  left: -8px;
+  bottom: 100%;
+  margin-bottom: -14px;
+  width: 84px;
+  height: 84px;
   object-fit: contain;
   pointer-events: none;
 }
@@ -306,4 +319,372 @@
   font-size: 11px;
   color: var(--ink-hint);
   margin-top: 8px;
+}
+
+/* ── 모달 공통 ───────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  background: var(--snow);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ── 전체 삭제 모달 ─────────────────────── */
+.delete-all-modal {
+  padding: 36px 28px;
+  width: 340px;
+}
+
+.delete-all-modal-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #FFF0F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.delete-all-modal h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.delete-all-modal p {
+  font-size: 14px;
+  color: var(--ink-md);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.delete-all-modal-highlight {
+  color: var(--petal-dark);
+  font-weight: 700;
+}
+
+.delete-all-modal-btns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ── 대화 삭제 드롭다운 ─────────────────── */
+.chat-delete-dropdown {
+  position: relative;
+}
+
+.chat-delete-dropdown-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--snow);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  width: 130px;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.chat-delete-dropdown-divider {
+  height: 1px;
+  background: var(--border);
+}
+
+.chat-delete-dropdown-item {
+  width: 100%;
+  padding: 11px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.chat-delete-dropdown-item:hover {
+  background: var(--petal-bg);
+}
+
+/* ── 로그아웃 모달 ───────────────────────── */
+.logout-modal {
+  padding: 36px 28px;
+  width: 320px;
+}
+
+.logout-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--blossom-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.logout-modal h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.logout-modal p {
+  font-size: 13px;
+  color: var(--ink-lt);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.logout-modal-btns {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* ── 조건 편집 오버레이 ─────────────────── */
+.condition-edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 사이드바 ────────────────────────────── */
+.sidebar {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  background: var(--petal-bg);
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar-logo-area {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-logo {
+  height: 88px;
+  display: block;
+  cursor: pointer;
+}
+
+.sidebar-search-area {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-search-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.sidebar-search-input-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.sidebar-search-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-lt);
+  font-size: 13px;
+  padding: 0;
+  line-height: 1;
+}
+
+.sidebar-cal-btn {
+  flex-shrink: 0;
+  border: 1.5px solid var(--border);
+  background: var(--cream);
+  border-radius: var(--r-pill);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all .15s;
+  font-family: inherit;
+}
+
+.sidebar-cal-btn.active {
+  background: var(--petal-bg);
+}
+
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sidebar-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--petal);
+  flex-shrink: 0;
+}
+
+.sidebar-status-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.sidebar-status-sub {
+  font-size: 12px;
+  color: var(--ink-lt);
+  margin: 0;
+}
+
+.sidebar-info-list {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-bottom: 12px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.info-row-label {
+  font-size: 13px;
+  color: var(--ink-lt);
+}
+
+.info-row-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-lt);
+}
+
+.info-row-value.highlight {
+  color: var(--petal-dark);
+}
+
+.sidebar-footer {
+  padding: 12px 16px 20px;
+  border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-card {
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.sidebar-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 3px;
+}
+
+.sidebar-card-desc {
+  font-size: 12px;
+  color: var(--ink-md);
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+
+.sidebar-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.sidebar-logout-btn {
+  font-size: 12px;
+  color: var(--ink-hint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.sidebar-login-btn {
+  font-size: 12px;
+  color: var(--petal-dark);
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.sidebar-settings-btn {
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: var(--ink-lt);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
 }

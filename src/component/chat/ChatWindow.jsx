@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import Onboarding from '../Onboarding';
-import Button from '../ui/Button';
-import DeleteCalendar from '../ui/DeleteCalendar';
 
 const CHIPS = [
   { label: '🤰 임신 중 혜택',    text: '임신 중에 받을 수 있는 혜택이 뭐가 있나요?' },
@@ -108,15 +106,11 @@ function TypingRow() {
 const getDateKey = (dateStr) => new Date(dateStr).toISOString().slice(0, 10);
 const formatDateLabel = (dateKey) => dateKey.replace(/-/g, '.');
 
-export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, onRegenerate, isLoading, showOnboarding, onOnboardingComplete, jumpToDate, searchMatches = [], searchKeyword = '', onClearSearch, onDeleteAll, onDeleteByDate }) {
+export default function ChatWindow({ messages, onSendMessage, onRegenerate, isLoading, showOnboarding, onOnboardingComplete, jumpToDate, searchMatches = [], searchKeyword = '', onClearSearch }) {
   const [inputText, setInputText] = useState('');
   const [searchIndex, setSearchIndex] = useState(0);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
-  const [showDateDelete, setShowDateDelete] = useState(false);
   const scrollRef = useRef(null);
   const taRef = useRef(null);
-  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -132,16 +126,6 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
   }, [jumpToDate]);
 
   useEffect(() => { setSearchIndex(0); }, [searchMatches]);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     if (!isLoading && taRef.current) taRef.current.focus();
@@ -174,37 +158,6 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
   return (
     <div className="chat-window">
 
-      {/* 헤더 */}
-      <div className="chat-header">
-        <span className="badge badge-ghost">
-          {isLoggedIn ? `✓ 회원 / 만 ${user?.userAge ?? ''}세` : '👤 비회원'}
-        </span>
-
-        {/* 대화 삭제 드롭다운 */}
-        <div ref={dropdownRef} className="chat-delete-dropdown">
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => setShowDropdown(v => !v)}
-          >
-            대화 삭제 ▾
-          </Button>
-          {showDropdown && (
-            <div className="chat-delete-dropdown-list">
-              <button
-                className="chat-delete-dropdown-item"
-                onClick={() => { setShowDropdown(false); setShowDeleteAllModal(true); }}
-              >전체 삭제</button>
-              <div className="chat-delete-dropdown-divider" />
-              <button
-                className="chat-delete-dropdown-item"
-                onClick={() => { setShowDropdown(false); setShowDateDelete(true); }}
-              >날짜별 삭제</button>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* 검색 네비바 */}
       {searchMatches.length > 0 && (
         <div className="chat-search-nav">
@@ -225,7 +178,7 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
 
           {showOnboarding && (
             <div className="chat-onboarding-center">
-              <Onboarding onClose={onOnboardingComplete} />
+              <Onboarding onClose={onOnboardingComplete} initialData={user} />
             </div>
           )}
 
@@ -267,36 +220,6 @@ export default function ChatWindow({ isLoggedIn, user, messages, onSendMessage, 
           {isLoading && <TypingRow />}
         </div>
       </div>
-
-      {/* 전체 삭제 확인 모달 */}
-      {showDeleteAllModal && (
-        <div className="modal-overlay">
-          <div className="modal-card delete-all-modal">
-            <div className="delete-all-modal-icon">🗑️</div>
-            <div>
-              <h2>전체 대화 삭제</h2>
-              <p>
-                지금까지의 모든 대화 내용이<br />
-                <span className="delete-all-modal-highlight">영구적으로 삭제</span>됩니다.<br />
-                이 작업은 되돌릴 수 없습니다.
-              </p>
-            </div>
-            <div className="delete-all-modal-btns">
-              <Button variant="secondary" size="md" onClick={() => setShowDeleteAllModal(false)} style={{ flex: 1 }}>취소</Button>
-              <Button variant="primary" size="md" onClick={() => { setShowDeleteAllModal(false); onDeleteAll(); }} style={{ flex: 1 }}>삭제</Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 날짜별 삭제 모달 */}
-      {showDateDelete && (
-        <DeleteCalendar
-          activeDates={[...new Set(messages.filter(m => m.createdAt).map(m => getDateKey(m.createdAt)))]}
-          onConfirm={onDeleteByDate}
-          onClose={() => setShowDateDelete(false)}
-        />
-      )}
 
       {/* 입력 */}
       <div className="chat-input-area">

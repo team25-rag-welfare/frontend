@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import useAuthStore from '../store/authStore';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Terms = () => {
   const navigate = useNavigate();
+  const { accessToken } = useAuthStore();
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -16,13 +18,12 @@ const Terms = () => {
     }
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
       await axios.post(
         `${API_URL}/api/auth/terms`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-      navigate('/chat');
+      navigate('/chat', { state: { fromTerms: true } });
     } catch (error) {
       console.error('약관 동의 실패:', error);
       alert('약관 동의 처리에 실패했습니다. 다시 시도해주세요.');

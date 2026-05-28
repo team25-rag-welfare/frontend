@@ -243,6 +243,7 @@
   padding: 8px 0 14px;
   background: transparent;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .chat-input-wrapper {
@@ -483,7 +484,6 @@
   background: var(--petal-bg);
   border-right: 1px solid var(--border);
   flex-shrink: 0;
-  overflow: hidden;
   position: relative;
 }
 
@@ -507,10 +507,17 @@
   padding: 14px 16px 12px;
   border-bottom: 1px solid var(--border);
   position: relative;
-  z-index: 1;
+  z-index: 50;
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.sidebar-search-icon-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .sidebar-search-row {
@@ -540,18 +547,26 @@
 
 .sidebar-cal-btn {
   flex-shrink: 0;
-  border: 1.5px solid var(--border);
-  background: var(--cream);
+  border: none;
+  background: none;
   border-radius: var(--r-pill);
-  padding: 6px 10px;
+  padding: 6px 8px;
   cursor: pointer;
-  font-size: 14px;
+  color: var(--ink-lt);
   transition: all .15s;
   font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-cal-btn:hover {
+  color: var(--ink);
+  background: var(--border);
 }
 
 .sidebar-cal-btn.active {
-  background: var(--petal-bg);
+  color: var(--petal);
 }
 
 .sidebar-body {
@@ -733,12 +748,127 @@
   padding: 0;
 }
 
-.sidebar-settings-btn {
+.sidebar-icon-btn {
   border: none;
   background: none;
-  font-size: 20px;
   color: var(--ink-lt);
   cursor: pointer;
-  padding: 0;
-  line-height: 1;
+  padding: 6px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+}
+
+.sidebar-icon-btn:hover {
+  background: var(--border);
+  color: var(--ink);
+}
+
+.sidebar-icon-btn.active {
+  color: var(--petal);
+  background: var(--petal-bg);
+}
+
+.sidebar-settings-btn {
+  margin-left: auto;
+}
+
+.sidebar-delete-wrap {
+  position: relative;
+}
+
+.sidebar-delete-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--snow);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+  min-width: 110px;
+  overflow: hidden;
+  z-index: 200;
+}
+
+.sidebar-delete-menu-item {
+  width: 100%;
+  padding: 9px 14px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: var(--ink);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background .1s;
+}
+
+.sidebar-delete-menu-item:hover {
+  background: var(--petal-bg);
+  color: var(--petal-dark);
+}
+
+/* ── 비회원 블러 게이트 ─────────────────── */
+.sidebar-user-section {
+  position: relative;
+}
+
+.sidebar-section-blurred {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.sidebar-login-gate {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 16px;
+}
+
+.sidebar-login-gate-icon {
+  font-size: 24px;
+}
+
+.sidebar-login-gate-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-md);
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.sidebar-login-gate-btn {
+  background: var(--petal);
+  color: white;
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 7px 18px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: var(--shadow-petal);
+  transition: background .15s;
+}
+
+.sidebar-login-gate-btn:hover {
+  background: #F096AD;
+}
+
+.sidebar-footer-card-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.sidebar-footer-card-wrap .sidebar-section-blurred {
+  filter: blur(4px);
 }

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import GuideModal from '../component/GuideModal';
+import useAuthStore from '../store/authStore';
 
 const BENEFITS = {
   '임신중': [
@@ -38,22 +40,57 @@ const TAB_ICON = { '임신중': '🤰', '출산후': '🍼', '육아중': '👶'
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user, fetchProfile, logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState('출산후');
+  const [showGuide, setShowGuide] = useState(() => !localStorage.getItem('guide_seen'));
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
 
+  useEffect(() => {
+    if (!user) fetchProfile();
+  }, []);
+
   return (
     <div className="home-root">
+
+      {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
 
       {/* 네비게이션 */}
       <nav className="home-nav">
         <img src="/logo.png" alt="산책" className="home-nav-logo" />
-        <button onClick={() => navigate('/login')} className="btn-nav">
-          시작하기 →
-        </button>
+        {user ? (
+          <div className="home-nav-profile-wrap">
+            <button onClick={() => setShowProfileMenu(v => !v)} className="home-nav-profile">
+              <img
+                src={user.profileImageUrl || '/Frame.svg'}
+                alt="프로필"
+                className="home-nav-profile-img"
+              />
+              <span className="home-nav-profile-name">{user.userName}</span>
+            </button>
+            {showProfileMenu && (
+              <>
+                <div className="home-nav-profile-backdrop" onClick={() => setShowProfileMenu(false)} />
+                <div className="home-nav-profile-menu">
+                  <button onClick={() => navigate('/chat')} className="home-nav-profile-menu-item">
+                    💬 채팅 시작하기
+                  </button>
+                  <button onClick={() => { logout(); setShowProfileMenu(false); }} className="home-nav-profile-menu-item logout">
+                    로그아웃
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <button onClick={() => navigate('/login')} className="btn-nav-text">
+            로그인
+          </button>
+        )}
       </nav>
 
       {/* 배경 + 본문 */}
@@ -82,12 +119,11 @@ export default function Home() {
             <p className="home-desc">
               임신부터 출산 후 12개월까지,<br />
               놓치기 쉬운 복지 혜택을 한눈에 모아드려요.<br />
-              로그인 없이 바로 확인해보세요.
             </p>
 
             <div className="home-btn-row">
-              <button onClick={() => navigate('/chat')} className="home-cta-btn">
-                🌿 혜택 바로 찾아보기
+              <button onClick={() => user ? navigate('/chat') : setShowGuide(true)} className="home-cta-btn">
+                🌿 시작하기
               </button>
             </div>
 
@@ -141,9 +177,6 @@ export default function Home() {
 
             <div className="home-card-footer">
               <span className="home-card-footer-note">💡 소득 분위에 따라 금액이 달라져요</span>
-              <button onClick={() => navigate('/chat')} className="home-more-btn">
-                더 보기 →
-              </button>
             </div>
           </div>
 

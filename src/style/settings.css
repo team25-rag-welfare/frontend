@@ -359,7 +359,7 @@
 }
 
 /* ── 온보딩 ─────────────────────────────── */
-.onboarding-wrap {
+.ob-wrap {
   width: 100%;
   height: 100%;
   display: flex;
@@ -368,37 +368,294 @@
   padding: 20px;
 }
 
-.onboarding-card {
-  width: 420px;
+.ob-card {
+  background: white;
+  border-radius: 28px;
+  padding: 36px 32px 28px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 24px 60px rgba(30,18,22,0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.onboarding-step-badge {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--petal-dark);
+/* 도트 인디케이터 */
+.ob-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.ob-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-md);
+  transition: all .25s;
+}
+
+.ob-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--petal);
+}
+
+.ob-dot.done {
+  background: var(--petal-light);
+}
+
+/* 진행 바 */
+.ob-progress-track {
+  height: 3px;
+  background: var(--petal-light);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: -8px 0;
+}
+
+.ob-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--petal), #F096AD);
+  border-radius: 2px;
+  transition: width .35s ease;
+}
+
+/* 헤더 */
+.ob-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ob-header-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-hint);
+  margin: 0 0 4px;
+  letter-spacing: 0.03em;
+}
+
+.ob-header-question {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ink);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+/* 본문 */
+.ob-body {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 임신 상태 카드 */
+.ob-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ob-status-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  background: var(--cream);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all .18s;
+  width: 100%;
+}
+
+.ob-status-card:hover {
+  border-color: var(--petal-light);
   background: var(--petal-bg);
-  border: 1.5px solid var(--petal-light);
-  border-radius: var(--r-pill);
-  padding: 4px 12px;
+}
+
+.ob-status-card.active {
+  border-color: var(--petal);
+  background: linear-gradient(135deg, #FFF5F7, #FFE8EE);
+  box-shadow: 0 4px 14px rgba(255,183,197,.2);
+}
+
+.ob-status-icon {
+  font-size: 26px;
   flex-shrink: 0;
 }
 
-.onboarding-progress-track {
-  height: 4px;
-  background: var(--petal-light);
-  border-radius: 2px;
-  margin: 0 24px 24px;
+.ob-status-text { flex: 1; }
+
+.ob-status-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 2px;
+}
+
+.ob-status-desc {
+  font-size: 12px;
+  color: var(--ink-lt);
+  margin: 0;
+}
+
+.ob-status-check {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--petal);
+  opacity: 0;
+  transition: opacity .15s;
+  flex-shrink: 0;
+}
+
+.ob-status-check.visible { opacity: 1; }
+
+/* 나이 스테퍼 */
+.ob-age-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ob-stepper-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ob-stepper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--cream);
   overflow: hidden;
 }
 
-.onboarding-progress-fill {
-  height: 100%;
-  background: var(--petal-dark);
-  border-radius: 2px;
-  transition: width .3s ease;
+.ob-stepper-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: var(--ink-lt);
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+  transition: background .1s;
 }
 
-.onboarding-body {
-  padding: 0 24px 8px;
-  min-height: 80px;
+.ob-stepper-btn:hover { background: var(--border); }
+
+.ob-stepper-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  font-family: inherit;
+  min-width: 0;
+}
+
+.ob-unit {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-lt);
+}
+
+.ob-hint {
+  font-size: 12px;
+  color: var(--ink-hint);
+  text-align: center;
+  margin: 0;
+}
+
+/* 자녀 수 칩 */
+.ob-chip-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ob-chip {
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--border-md);
+  background: var(--cream);
+  color: var(--ink-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+
+.ob-chip:hover { background: var(--petal-bg); border-color: var(--petal-light); }
+
+.ob-chip.active {
+  border-color: transparent;
+  background: var(--petal);
+  color: white;
+  font-weight: 700;
+  box-shadow: var(--shadow-petal);
+}
+
+/* 인라인 에러 */
+.ob-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: #E05A6A;
+  text-align: center;
+  margin: -8px 0 0;
+  min-height: 18px;
+}
+
+/* 하단 버튼 */
+.ob-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.ob-btn-prev {
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-lt);
+  cursor: pointer;
+  font-family: inherit;
+  padding: 8px 4px;
+  transition: color .15s;
+}
+.ob-btn-prev:hover { color: var(--ink); }
+
+.ob-btn-next {
+  background: linear-gradient(135deg, var(--petal), #F096AD);
+  color: white;
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 11px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: var(--shadow-petal);
+  transition: all .18s;
+}
+.ob-btn-next:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,183,197,.55);
 }

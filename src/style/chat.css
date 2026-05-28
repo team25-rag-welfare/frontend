@@ -69,7 +69,7 @@
 }
 
 .chat-messages {
-  max-width: 860px;
+  max-width: 700px;
   width: 100%;
   margin: 0 auto;
   padding: 0 24px;
@@ -164,15 +164,15 @@
 .msg-bubble-wrapper {
   display: flex;
   flex-direction: column;
-  max-width: 68%;
+  max-width: 78%;
 }
 
 .msg-bubble-wrapper-user { align-items: flex-end; }
 .msg-bubble-wrapper-ai   { align-items: flex-start; }
 
 /* ── 마크다운 렌더링 ─────────────────────── */
-.md-content { font-size: inherit; line-height: 1.7; }
-.md-content p { margin: 0 0 8px; }
+.md-content { font-size: inherit; line-height: 1.85; }
+.md-content p { margin: 0 0 12px; }
 .md-content p:last-child { margin-bottom: 0; }
 .md-content strong { font-weight: 700; }
 .md-content em { font-style: italic; }
@@ -247,7 +247,7 @@
 }
 
 .chat-input-wrapper {
-  max-width: 860px;
+  max-width: 700px;
   width: 100%;
   margin: 0 auto;
   padding: 0 24px;
@@ -302,15 +302,13 @@
 }
 
 .chat-send-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   border: none;
   flex-shrink: 0;
   background: linear-gradient(135deg, var(--petal), #F096AD);
   color: white;
-  font-size: 16px;
-  font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-petal);
   transition: all .2s;
@@ -319,7 +317,16 @@
   justify-content: center;
 }
 
-.chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-send-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(255,183,197,.6);
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
 
 .chat-footer-text {
   text-align: center;

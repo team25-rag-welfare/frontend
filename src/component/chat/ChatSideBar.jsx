@@ -14,9 +14,9 @@ const STATUS_LABEL = {
   POSTPARTUM: '출산 후'
 };
 
-function InfoRow({ label, value, highlight }) {
+function InfoRow({ label, value, highlight, primary }) {
   return (
-    <div className="info-row">
+    <div className={`info-row${primary ? ' primary' : ''}`}>
       <span className="info-row-label">{label}</span>
       <span className={`info-row-value${highlight ? ' highlight' : ''}`}>
         {value ?? '미입력'}
@@ -231,13 +231,14 @@ export default function ChatSidebar({ isLoggedIn, user, messages = [], onLogout,
             </div>
 
             <div className="sidebar-info-list">
-              <InfoRow label="거주지" value={u.district ?? null} highlight={u.district != null} />
-              <InfoRow label="만 나이" value={u.userAge != null ? `${u.userAge}세` : null} highlight={u.userAge != null} />
-              <InfoRow label="자녀 수" value={u.childCount != null ? `${u.childCount}명` : null} highlight={u.childCount != null} />
+              <InfoRow label="거주지" value={u.district ?? null} highlight={u.district != null} primary />
+              <InfoRow label="만 나이" value={u.userAge != null ? `${u.userAge}세` : null} highlight={u.userAge != null} primary />
+              <InfoRow label="자녀 수" value={u.childCount != null ? `${u.childCount}명` : null} highlight={u.childCount != null} primary />
+              <p className="sidebar-info-secondary-label">기타 조건</p>
               <InfoRow label="주택 소유" value={u.isHomeless == null ? null : u.isHomeless ? '없음' : '보유'} highlight={u.isHomeless != null} />
               <InfoRow label="소득 구간" value={u.incomeLevel != null ? `${u.incomeLevel}분위` : null} highlight={u.incomeLevel != null} />
-              <InfoRow label="다태아 여부" value={u.isMultibirth == null ? null : u.isMultibirth ? '해당' : '해당 없음'} highlight={u.isMultibirth === true} />
-              <InfoRow label="외국인 여부" value={u.isForeigner == null ? null : u.isForeigner ? '해당' : '해당 없음'} highlight={u.isForeigner === true} />
+              <InfoRow label="다태아" value={u.isMultibirth == null ? null : u.isMultibirth ? '해당' : '해당 없음'} highlight={u.isMultibirth === true} />
+              <InfoRow label="외국인" value={u.isForeigner == null ? null : u.isForeigner ? '해당' : '해당 없음'} highlight={u.isForeigner === true} />
               <InfoRow label="거주 기간" value={u.residenceMonths != null ? `${u.residenceMonths}개월` : null} highlight={u.residenceMonths != null} />
             </div>
           </div>

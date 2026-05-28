@@ -274,10 +274,16 @@
   align-items: flex-end;
   gap: 10px;
   padding: 10px 14px;
-  background: var(--cream);
-  border: 1.5px solid var(--border);
+  background: var(--snow);
+  border: 1.5px solid var(--border-md);
   border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(61,42,48,.07);
   transition: all .2s;
+}
+
+.chat-input-box:focus-within {
+  border-color: var(--petal);
+  box-shadow: 0 4px 24px rgba(255,183,197,.35);
 }
 
 .chat-textarea {
@@ -692,6 +698,25 @@
 
 .info-row-value.highlight {
   color: var(--petal-dark);
+}
+
+.info-row.primary .info-row-label {
+  font-size: 13px;
+  color: var(--ink-md);
+  font-weight: 500;
+}
+
+.info-row.primary .info-row-value.highlight {
+  color: var(--petal-dark);
+  font-size: 14px;
+}
+
+.sidebar-info-secondary-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-hint);
+  letter-spacing: 0.04em;
+  margin: 8px 0 2px;
 }
 
 .sidebar-footer {

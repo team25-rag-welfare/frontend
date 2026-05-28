@@ -27,25 +27,22 @@ export default function MiniCalendar({ activeDates, onDateSelect, onClose }) {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
-    <div style={{ background: 'var(--snow)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: '14px 12px', boxShadow: 'var(--shadow-md)' }}>
-      {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <button onClick={prevMonth} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--ink-lt)', fontSize: 16, padding: '2px 6px', fontFamily: 'inherit' }}>‹</button>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>
+    <div className="mini-cal">
+      <div className="mini-cal-header">
+        <button onClick={prevMonth} className="mini-cal-nav-btn">‹</button>
+        <span className="mini-cal-month">
           {viewYear}.{String(viewMonth + 1).padStart(2, '0')}
         </span>
-        <button onClick={nextMonth} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--ink-lt)', fontSize: 16, padding: '2px 6px', fontFamily: 'inherit' }}>›</button>
+        <button onClick={nextMonth} className="mini-cal-nav-btn">›</button>
       </div>
 
-      {/* 요일 헤더 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 4 }}>
+      <div className="mini-cal-day-labels">
         {DAY_LABELS.map(d => (
-          <div key={d} style={{ textAlign: 'center', fontSize: 10, fontWeight: 600, color: 'var(--ink-hint)', padding: '2px 0' }}>{d}</div>
+          <div key={d} className="mini-cal-day-label">{d}</div>
         ))}
       </div>
 
-      {/* 날짜 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
+      <div className="mini-cal-grid">
         {cells.map((day, i) => {
           if (!day) return <div key={i} />;
           const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -55,21 +52,7 @@ export default function MiniCalendar({ activeDates, onDateSelect, onClose }) {
               key={i}
               disabled={!isActive}
               onClick={() => { onDateSelect(dateKey); onClose(); }}
-              style={{
-                border: 'none',
-                background: isActive ? 'var(--petal-bg)' : 'transparent',
-                color: isActive ? 'var(--petal-dark)' : 'var(--ink-hint)',
-                fontWeight: isActive ? 700 : 400,
-                fontSize: 12,
-                borderRadius: 'var(--r-sm)',
-                padding: '5px 0',
-                cursor: isActive ? 'pointer' : 'default',
-                fontFamily: 'inherit',
-                opacity: isActive ? 1 : 0.4,
-                transition: 'all .15s',
-              }}
-              onMouseEnter={e => { if (isActive) e.currentTarget.style.background = 'var(--petal-light)'; }}
-              onMouseLeave={e => { if (isActive) e.currentTarget.style.background = 'var(--petal-bg)'; }}
+              className={`mini-cal-day-btn${isActive ? ' active' : ''}`}
             >
               {day}
             </button>

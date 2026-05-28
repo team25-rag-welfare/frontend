@@ -9,8 +9,6 @@ function App() {
   
   return (
     <div className="App">
-      {/*화면 한가운데에 채팅창 하나 띄웁니다.*/}
-      {/* <ChatPage /> */}
       <Router>
         
       </Router>

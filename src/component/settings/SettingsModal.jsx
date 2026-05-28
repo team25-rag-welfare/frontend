@@ -50,6 +50,38 @@ export default function SettingsModal({ onClose, onProfileUpdate }) {
     }
   };
 
+  const compressImage = (file, maxSizeKB = 900) => new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+      const MAX_DIM = 1200;
+      if (width > MAX_DIM || height > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      let quality = 0.85;
+      const tryCompress = () => {
+        canvas.toBlob((blob) => {
+          if (blob.size <= maxSizeKB * 1024 || quality <= 0.3) {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          } else {
+            quality -= 0.1;
+            tryCompress();
+          }
+        }, 'image/jpeg', quality);
+      };
+      tryCompress();
+    };
+    img.src = url;
+  });
+
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -58,13 +90,14 @@ export default function SettingsModal({ onClose, onProfileUpdate }) {
       alert('이미지 파일만 업로드할 수 있습니다.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 최대 5MB까지 가능합니다.');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('파일 크기는 최대 10MB까지 가능합니다.');
       return;
     }
 
+    const compressed = await compressImage(file);
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', compressed);
 
     setIsUploading(true);
     try {
@@ -191,15 +224,11 @@ export default function SettingsModal({ onClose, onProfileUpdate }) {
                           flexShrink: 0
                         }}
                       >
-                        {userInfo?.profileImageUrl ? (
-                          <img 
-                            src={userInfo.profileImageUrl} 
-                            alt="프로필 이미지" 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <span style={{ fontSize: '32px' }}>👶</span>
-                        )}
+                        <img
+                          src={userInfo?.profileImageUrl || '/Frame.svg'}
+                          alt="프로필 이미지"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
                         
                         {(isHovered || isUploading) && (
                           <div style={{

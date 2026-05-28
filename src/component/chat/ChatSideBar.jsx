@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import MiniCalendar from '../ui/MiniCalendar';
+import useAuthStore from '../../store/authStore';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -12,11 +14,11 @@ const STATUS_LABEL = {
   POSTPARTUM: '출산 후'
 };
 
-function InfoRow({ label, value, highlight }) {
+function InfoRow({ label, value, highlight, primary }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0' }}>
-      <span style={{ fontSize: 13, color: 'var(--ink-lt)' }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 700, color: highlight ? 'var(--petal-dark)' : 'var(--ink-lt)' }}>
+    <div className={`info-row${primary ? ' primary' : ''}`}>
+      <span className="info-row-label">{label}</span>
+      <span className={`info-row-value${highlight ? ' highlight' : ''}`}>
         {value ?? '미입력'}
       </span>
     </div>
@@ -25,7 +27,8 @@ function InfoRow({ label, value, highlight }) {
 
 const getDateKey = (dateStr) => new Date(dateStr).toISOString().slice(0, 10);
 
-export default function ChatSidebar({ user, messages = [], onLogout, onEditCondition, onDateSelect, onSearch, onOpenSettings }) {
+export default function ChatSidebar({ isLoggedIn, user, messages = [], onLogout, onEditCondition, onDateSelect, onSearch, onOpenSettings, onShowDeleteAll, onShowDeleteByDate }) {
+  const navigate = useNavigate();
   const u = user || {
     userName: null,
     userAge: null,
@@ -41,27 +44,45 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
     isHomeless: null,
   };
 
+  const { accessToken } = useAuthStore();
   const [keyword, setKeyword] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const deleteMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (deleteMenuRef.current && !deleteMenuRef.current.contains(e.target)) {
+        setShowDeleteMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const uniqueDates = [...new Set(
     messages.filter(m => m.createdAt).map(m => getDateKey(m.createdAt))
   )].reverse();
-  const token = () => localStorage.getItem('access_token');
-  if (!token) {
-    alert("회원 전용 기능입니다. 로그인 하고 오십시오.");
-    return;
-  }
 
   const handleSearch = async () => {
     if (!keyword.trim()) {
       onSearch([], '');
       return;
     }
+
+    if (!isLoggedIn) {
+      const matchedIds = messages
+        .filter(m => m.content?.includes(keyword))
+        .map(m => m.id);
+      onSearch(matchedIds, keyword);
+      return;
+    }
+
     try {
       const res = await axios.get(
         `${API_URL}/api/v2/chats/search?keyword=${keyword}`,
-        { headers: { Authorization: `Bearer ${token()}` } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       const resultTimes = new Set(res.data.content.map(r => r.createdAt));
       const matchedIds = messages
@@ -75,141 +96,179 @@ export default function ChatSidebar({ user, messages = [], onLogout, onEditCondi
 
   const statusLabel = STATUS_LABEL[u.pregnancyStatus] || '미입력';
 
+  const calcPregnancyWeeks = (dueDate) => {
+    if (!dueDate) return null;
+    const weeks = 40 - Math.round((new Date(dueDate) - new Date()) / (7 * 24 * 60 * 60 * 1000));
+    return weeks >= 1 && weeks <= 42 ? weeks : null;
+  };
+
+  const pregnancyWeeks = calcPregnancyWeeks(u.dueDate);
+
   const subStatus = [
-    u.pregnancyWeeks ? `${u.pregnancyWeeks}주차` : null,
-    u.infantMonths ? `영아 ${u.infantMonths}개월` : null,
+    u.pregnancyStatus === 'PREGNANT' && pregnancyWeeks ? `${pregnancyWeeks}주차` : null,
+    u.pregnancyStatus === 'POSTPARTUM' && u.infantMonths ? `영아 ${u.infantMonths}개월` : null,
   ]
     .filter(Boolean)
     .join(' · ');
 
   return (
-    <div style={{ width: 280, display: 'flex', flexDirection: 'column', background: 'var(--petal-bg)', borderRight: '1px solid var(--border)', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
+    <div className="sidebar">
 
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <img src="/logo.png" alt="산책" style={{ height: 88, display: 'block' }} />
+      <div className="sidebar-logo-area">
+        <img src="/logo.png" alt="산책" onClick={() => navigate('/')} className="sidebar-logo" />
       </div>
 
-      <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid var(--border)', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Input
-              shape="pill"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="내 대화 기록 찾기"
-              style={{ paddingRight: 36, fontSize: 12 }}
-            />
-            <button onClick={handleSearch} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--ink-lt)', fontSize: 13 }}>
-              🔍
+      <div className="sidebar-search-area">
+        <div className="sidebar-search-icon-row">
+          <button
+            onClick={() => { setShowSearch(v => !v); setShowCalendar(false); }}
+            className={`sidebar-icon-btn${showSearch ? ' active' : ''}`}
+            title="검색"
+          >
+            <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+          {isLoggedIn && (
+            <div ref={deleteMenuRef} className="sidebar-delete-wrap">
+              <button
+                onClick={() => setShowDeleteMenu(v => !v)}
+                className={`sidebar-icon-btn${showDeleteMenu ? ' active' : ''}`}
+                title="대화 삭제"
+              >
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.5 4h10M6 4V2.5h3V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3.5 4l.5 9h7l.5-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {showDeleteMenu && (
+                <div className="sidebar-delete-menu">
+                  <button className="sidebar-delete-menu-item" onClick={() => { setShowDeleteMenu(false); onShowDeleteAll(); }}>전체 삭제</button>
+                  <button className="sidebar-delete-menu-item" onClick={() => { setShowDeleteMenu(false); onShowDeleteByDate(); }}>날짜별 삭제</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {showSearch && (
+          <div className="sidebar-search-row">
+            <div className="sidebar-search-input-wrap">
+              <Input
+                shape="pill"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                placeholder="내 대화 기록 찾기"
+                style={{ paddingRight: 36, fontSize: 12 }}
+              />
+              <button onClick={handleSearch} className="sidebar-search-btn">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <button
+              onClick={() => setShowCalendar(v => !v)}
+              className={`sidebar-cal-btn${showCalendar ? ' active' : ''}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M1 7h14" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M5 1v3M11 1v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
             </button>
           </div>
-          <button
-            onClick={() => setShowCalendar(v => !v)}
-            style={{ flexShrink: 0, border: '1.5px solid var(--border)', background: showCalendar ? 'var(--petal-bg)' : 'var(--cream)', borderRadius: 'var(--r-pill)', padding: '6px 10px', cursor: 'pointer', fontSize: 14, transition: 'all .15s' }}
-          >
-            📅
-          </button>
-        </div>
-        {showCalendar && (
-          <MiniCalendar
-            activeDates={uniqueDates}
-            onDateSelect={onDateSelect}
-            onClose={() => setShowCalendar(false)}
-          />
+        )}
+
+        {showSearch && showCalendar && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200, padding: '0 16px' }}>
+            <MiniCalendar
+              activeDates={uniqueDates}
+              onDateSelect={onDateSelect}
+              onClose={() => setShowCalendar(false)}
+            />
+          </div>
         )}
       </div>
 
-      <div className="chat-scroll" style={{ flex: 1, overflowY: 'auto', padding: '14px 16px', position: 'relative', zIndex: 1 }}>
-        {/* 프로필 카드 영역 */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.65)',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid var(--border)',
-          borderRadius: '16px',
-          padding: '12px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          marginBottom: '16px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)'
-        }}>
-          <div style={{
-            width: '46px',
-            height: '46px',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            border: '2px solid white',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#FFEBF0',
-            flexShrink: 0
-          }}>
-            {u.profileImageUrl ? (
-              <img 
-                src={u.profileImageUrl} 
-                alt="프로필" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <span style={{ fontSize: '20px' }}>👶</span>
-            )}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
-            <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--ink)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-              {u.userName || '반가워요!'}
-            </span>
-            <span style={{ fontSize: '11px', color: 'var(--ink-lt)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-              #{u.userId ? u.userId : '비회원'}
-            </span>
-          </div>
-        </div>
+      <div className="sidebar-body chat-scroll">
+        <div className="sidebar-user-section">
+          {!isLoggedIn && (
+            <div className="sidebar-login-gate">
+              <span className="sidebar-login-gate-icon">🔒</span>
+              <p className="sidebar-login-gate-text">로그인 후<br />이용 가능합니다</p>
+              <button onClick={() => navigate('/login')} className="sidebar-login-gate-btn">
+                로그인하기
+              </button>
+            </div>
+          )}
+          <div className={isLoggedIn ? '' : 'sidebar-section-blurred'}>
+            <div className="sidebar-profile-card">
+              <div className="sidebar-profile-avatar">
+                <img
+                  src={u.profileImageUrl || '/Frame.svg'}
+                  alt="프로필"
+                  className="sidebar-profile-img"
+                />
+              </div>
+              <div className="sidebar-profile-info">
+                <span className="sidebar-profile-name">{u.userName || '반가워요!'}</span>
+                <span className="sidebar-profile-id">#{u.userId ? u.userId : '비회원'}</span>
+              </div>
+            </div>
 
-        <div style={{ marginBottom: 10 }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>내 조건</span>
-        </div>
+            <p className="sidebar-section-title">내 조건</p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--petal)', flexShrink: 0 }} />
-          <div>
-            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>{statusLabel}</p>
-            {subStatus && <p style={{ fontSize: 12, color: 'var(--ink-lt)' }}>{subStatus}</p>}
+            <div className="sidebar-status">
+              <span className="sidebar-status-dot" />
+              <div>
+                <p className="sidebar-status-label">{statusLabel}</p>
+                {subStatus && <p className="sidebar-status-sub">{subStatus}</p>}
+              </div>
+            </div>
+
+            <div className="sidebar-info-list">
+              <InfoRow label="거주지" value={u.district ?? null} highlight={u.district != null} primary />
+              <InfoRow label="만 나이" value={u.userAge != null ? `${u.userAge}세` : null} highlight={u.userAge != null} primary />
+              <InfoRow label="자녀 수" value={u.childCount != null ? `${u.childCount}명` : null} highlight={u.childCount != null} primary />
+              <p className="sidebar-info-secondary-label">기타 조건</p>
+              <InfoRow label="주택 소유" value={u.isHomeless == null ? null : u.isHomeless ? '없음' : '보유'} highlight={u.isHomeless != null} />
+              <InfoRow label="소득 구간" value={u.incomeLevel != null ? `${u.incomeLevel}분위` : null} highlight={u.incomeLevel != null} />
+              <InfoRow label="다태아" value={u.isMultibirth == null ? null : u.isMultibirth ? '해당' : '해당 없음'} highlight={u.isMultibirth === true} />
+              <InfoRow label="외국인" value={u.isForeigner == null ? null : u.isForeigner ? '해당' : '해당 없음'} highlight={u.isForeigner === true} />
+              <InfoRow label="거주 기간" value={u.residenceMonths != null ? `${u.residenceMonths}개월` : null} highlight={u.residenceMonths != null} />
+            </div>
           </div>
-        </div>
-
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginBottom: 12 }}>
-          <InfoRow label="거주지" value={u.district ?? null} highlight={u.district != null} />
-          <InfoRow label="만 나이" value={u.userAge != null ? `${u.userAge}세` : null} highlight={u.userAge != null} />
-          <InfoRow label="자녀 수" value={u.childCount != null ? `${u.childCount}명` : null} highlight={u.childCount != null} />
-          <InfoRow label="주택 소유" value={u.isHomeless == null ? null : u.isHomeless ? '없음' : '보유'} highlight={u.isHomeless != null} />
-          <InfoRow label="소득 구간" value={u.incomeLevel != null ? `${u.incomeLevel}분위` : null} highlight={u.incomeLevel != null} />
-          <InfoRow label="다태아 여부" value={u.isMultibirth == null ? null : u.isMultibirth ? '해당' : '해당 없음'} highlight={u.isMultibirth === true} />
-          <InfoRow label="외국인 여부" value={u.isForeigner == null ? null : u.isForeigner ? '해당' : '해당 없음'} highlight={u.isForeigner === true} />
-          <InfoRow label="거주 기간" value={u.residenceMonths != null ? `${u.residenceMonths}개월` : null} highlight={u.residenceMonths != null} />
         </div>
       </div>
 
-      <div style={{ padding: '12px 16px 20px', borderTop: '1px solid var(--border)', position: 'relative', zIndex: 1 }}>
-        <div className="card-petal" style={{ padding: '12px 14px', marginBottom: 12 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>내 복지 조건</p>
-          <p style={{ fontSize: 12, color: 'var(--ink-md)', lineHeight: 1.6, marginBottom: 10 }}>
-            조건을 업데이트하면
-            <br />
-            더 정확한 혜택을 찾아드려요!
-          </p>
-          <Button variant="primary" size="sm" onClick={onEditCondition} style={{ width: '100%' }}>
-            조건 수정하기
-          </Button>
+      <div className="sidebar-footer">
+        <div className="sidebar-footer-card-wrap">
+          <div className={`card-petal sidebar-card${isLoggedIn ? '' : ' sidebar-section-blurred'}`}>
+            <p className="sidebar-card-title">내 복지 조건</p>
+            <p className="sidebar-card-desc">
+              조건을 업데이트하면
+              <br />
+              더 정확한 혜택을 찾아드려요!
+            </p>
+            <Button variant="primary" size="sm" onClick={onEditCondition} style={{ width: '100%' }}>
+              조건 수정하기
+            </Button>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8 }}>
-          <button onClick={onLogout} style={{ fontSize: 12, color: 'var(--ink-hint)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
-            로그아웃
-          </button>
-          <button onClick={onOpenSettings} style={{ border: 'none', background: 'none', fontSize: 20, color: 'var(--ink-lt)', cursor: 'pointer' }}>
-            ⚙️
+        <div className="sidebar-actions">
+          {isLoggedIn && (
+            <button onClick={onLogout} className="sidebar-logout-btn">로그아웃</button>
+          )}
+          <button onClick={onOpenSettings} className="sidebar-icon-btn sidebar-settings-btn">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7.5" cy="7.5" r="2" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M7.5 1.5v1.2M7.5 12.3v1.2M1.5 7.5h1.2M12.3 7.5h1.2M3.4 3.4l.85.85M10.75 10.75l.85.85M3.4 11.6l.85-.85M10.75 4.25l.85-.85" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
           </button>
         </div>
       </div>

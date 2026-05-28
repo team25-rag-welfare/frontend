@@ -77,7 +77,7 @@ export default function Home() {
                 <div className="home-nav-profile-backdrop" onClick={() => setShowProfileMenu(false)} />
                 <div className="home-nav-profile-menu">
                   <button onClick={() => navigate('/chat')} className="home-nav-profile-menu-item">
-                    💬 채팅 시작하기
+                    채팅 시작하기
                   </button>
                   <button onClick={() => { logout(); setShowProfileMenu(false); }} className="home-nav-profile-menu-item logout">
                     로그아웃

@@ -64,18 +64,18 @@
 .chat-body {
   flex: 1;
   overflow-y: auto;
-  padding: 36px 0;
+  padding: 20px 0 36px;
   background: #F6FBF6;
 }
 
 .chat-messages {
-  max-width: 700px;
+  max-width: 740px;
   width: 100%;
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
 }
 
 .chat-onboarding-center {
@@ -151,9 +151,9 @@
 .msg-row {
   display: flex;
   gap: 12px;
-  align-items: flex-start;
+  align-items: flex-end;
   border-radius: 16px;
-  padding: 4px;
+  padding: 2px 4px;
   background: transparent;
   transition: all .2s;
 }
@@ -164,24 +164,24 @@
 .msg-bubble-wrapper {
   display: flex;
   flex-direction: column;
-  max-width: 78%;
+  max-width: 85%;
+  width: fit-content;
 }
 
 .msg-bubble-wrapper-user { align-items: flex-end; }
-.msg-bubble-wrapper-ai   { align-items: flex-start; }
+.msg-bubble-wrapper-ai   { align-items: flex-start; max-width: 72%; }
 
 /* ── 마크다운 렌더링 ─────────────────────── */
 .md-content { font-size: inherit; line-height: 1.85; }
 .md-content p { margin: 0 0 12px; }
 .md-content p:last-child { margin-bottom: 0; }
-.md-content strong { font-weight: 700; }
-.md-content em { font-style: italic; }
-.md-content ul, .md-content ol { margin: 6px 0 8px 18px; padding: 0; }
-.md-content li { margin-bottom: 4px; }
-.md-content h1, .md-content h2, .md-content h3 { font-weight: 700; margin: 10px 0 6px; line-height: 1.3; }
-.md-content h1 { font-size: 1.15em; }
-.md-content h2 { font-size: 1.05em; }
-.md-content h3 { font-size: 1em; }
+.md-content strong { font-weight: 700; color: var(--ink); }
+.md-content em { font-style: italic; color: var(--ink-md); }
+.md-content ul, .md-content ol { margin: 8px 0 12px 20px; padding: 0; }
+.md-content li { margin-bottom: 8px; }
+.md-content h1 { font-size: 1.1em; font-weight: 800; margin: 20px 0 10px; line-height: 1.3; color: var(--ink); }
+.md-content h2 { font-size: 1.0em; font-weight: 800; margin: 18px 0 8px; line-height: 1.3; color: var(--ink); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.md-content h3 { font-size: 0.95em; font-weight: 700; margin: 14px 0 6px; line-height: 1.3; color: var(--ink-md); letter-spacing: -0.01em; }
 .md-content code { background: rgba(0,0,0,.06); border-radius: 4px; padding: 1px 5px; font-size: .9em; font-family: monospace; }
 .md-content pre { background: rgba(0,0,0,.06); border-radius: 8px; padding: 10px 14px; overflow-x: auto; margin: 8px 0; }
 .md-content pre code { background: none; padding: 0; }
@@ -240,14 +240,14 @@
 
 /* ── 입력 영역 ───────────────────────────── */
 .chat-input-area {
-  padding: 8px 0 14px;
+  padding: 12px 0 28px;
   background: transparent;
   flex-shrink: 0;
   overflow: visible;
 }
 
 .chat-input-wrapper {
-  max-width: 700px;
+  max-width: 740px;
   width: 100%;
   margin: 0 auto;
   padding: 0 24px;
@@ -260,13 +260,14 @@
 
 .chat-mascot {
   position: absolute;
-  left: -8px;
+  left: 0px;
   bottom: 100%;
-  margin-bottom: -14px;
+  margin-bottom: -22px;
   width: 84px;
   height: 84px;
   object-fit: contain;
   pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(61,42,48,.12));
 }
 
 .chat-input-box {

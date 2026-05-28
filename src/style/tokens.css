@@ -21,10 +21,10 @@
   --border-md:    rgba(242,199,199,.6);
 
   /* Text */
-  --ink:          #3D2A30;
-  --ink-md:       #6A4852;
-  --ink-lt:       #8A6470;
-  --ink-hint:     #9E8089;
+  --ink:          #2E1E24;
+  --ink-md:       #5A3A46;
+  --ink-lt:       #7A5462;
+  --ink-hint:     #8E6A76;
 
   /* Radius */
   --r-sm:   8px;

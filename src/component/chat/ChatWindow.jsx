@@ -67,7 +67,6 @@ function MessageRow({ msg, keyword, onRegenerate, isLoading }) {
   const isUser = msg.senderType === 'USER';
   return (
     <div id={`msg-${msg.id}`} className={`msg-row anim-fadeup ${isUser ? 'msg-row-user' : 'msg-row-ai'}`}>
-      {!isUser && <Avatar />}
       <div className={`msg-bubble-wrapper ${isUser ? 'msg-bubble-wrapper-user' : 'msg-bubble-wrapper-ai'}`}>
         <div className={isUser ? 'bubble-user' : 'bubble-ai'}>
           {isUser

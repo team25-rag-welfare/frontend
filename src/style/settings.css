@@ -371,47 +371,36 @@
 .ob-card {
   background: white;
   border-radius: 28px;
-  padding: 36px 32px 28px;
+  padding: 32px 32px 24px;
   width: 100%;
   max-width: 460px;
   box-shadow: 0 24px 60px rgba(30,18,22,0.14);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
-/* 도트 인디케이터 */
-.ob-dots {
+/* 진행 바 + 숫자 */
+.ob-progress-header {
   display: flex;
-  gap: 6px;
-  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
-.ob-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--border-md);
-  transition: all .25s;
+.ob-progress-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--petal-dark);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.ob-dot.active {
-  width: 24px;
-  border-radius: 4px;
-  background: var(--petal);
-}
-
-.ob-dot.done {
-  background: var(--petal-light);
-}
-
-/* 진행 바 */
 .ob-progress-track {
-  height: 3px;
+  flex: 1;
+  height: 4px;
   background: var(--petal-light);
   border-radius: 2px;
   overflow: hidden;
-  margin: -8px 0;
 }
 
 .ob-progress-fill {
@@ -643,19 +632,20 @@
 .ob-btn-prev:hover { color: var(--ink); }
 
 .ob-btn-next {
-  background: linear-gradient(135deg, var(--petal), #F096AD);
+  background: linear-gradient(135deg, #F096AD, #E07A9A);
   color: white;
   border: none;
   border-radius: var(--r-pill);
-  padding: 11px 28px;
+  padding: 10px 22px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: var(--shadow-petal);
+  box-shadow: 0 4px 14px rgba(240,150,173,.32);
   transition: all .18s;
 }
 .ob-btn-next:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255,183,197,.55);
+  background: linear-gradient(135deg, #E07A9A, #CC6080);
+  box-shadow: 0 6px 18px rgba(240,150,173,.44);
 }

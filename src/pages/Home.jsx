@@ -108,7 +108,7 @@ export default function Home() {
 
           {/* 왼쪽: 히어로 */}
           <div className="home-hero">
-            <div className="home-badge">✦ 임산부·출산 후 12개월 복지 가이드</div>
+            
 
             <h1 className="headline">
               내가 받을 수 있는<br />
@@ -123,7 +123,7 @@ export default function Home() {
 
             <div className="home-btn-row">
               <button onClick={() => user ? navigate('/chat') : setShowGuide(true)} className="home-cta-btn">
-                🌿 시작하기
+                시작하기
               </button>
             </div>
 

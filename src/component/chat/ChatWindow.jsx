@@ -177,7 +177,7 @@ export default function ChatWindow({ messages, onSendMessage, onRegenerate, isLo
 
           {showOnboarding && (
             <div className="chat-onboarding-center">
-              <Onboarding onClose={onOnboardingComplete} initialData={user} />
+              <Onboarding onClose={onOnboardingComplete} />
             </div>
           )}
 
@@ -221,7 +221,7 @@ export default function ChatWindow({ messages, onSendMessage, onRegenerate, isLo
       </div>
 
       {/* 입력 */}
-      <div className="chat-input-area">
+      <div className="chat-input-area" style={showOnboarding ? { opacity: 0.25, pointerEvents: 'none' } : {}}>
         <div className="chat-input-wrapper">
           <div className="chat-input-row">
             <img src="/dog.png" alt="" className="chat-mascot" />

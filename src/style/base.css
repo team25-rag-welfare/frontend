@@ -12,9 +12,9 @@ html, body {
 /* ── 헤드라인 ──────────────────────────── */
 .headline {
   font-size: 52px;
-  font-weight: 900;
-  line-height: 1.22;
-  letter-spacing: -2px;
+  font-weight: 700;
+  line-height: 1.52;
+  letter-spacing: -0.8px;
   color: var(--brown);
   margin-bottom: 18px;
 }

@@ -120,21 +120,17 @@ export default function Onboarding({ onClose, initialData }) {
     <div className="ob-wrap">
       <div className="ob-card">
 
-        {/* 진행 인디케이터 */}
-        <div className="ob-dots">
-          {STEPS.map((_, i) => (
-            <span key={i} className={`ob-dot${i === step ? ' active' : i < step ? ' done' : ''}`} />
-          ))}
-        </div>
-
         {/* 진행 바 */}
-        <div className="ob-progress-track">
-          <div className="ob-progress-fill" style={{ width: `${progress}%` }} />
+        <div className="ob-progress-header">
+          <span className="ob-progress-label">{step + 1} / {STEPS.length}</span>
+          <div className="ob-progress-track">
+            <div className="ob-progress-fill" style={{ width: `${progress}%` }} />
+          </div>
         </div>
 
         {/* 헤더 */}
         <div className="ob-header">
-          <p className="ob-header-label">{step + 1} / {STEPS.length} · {current.label}</p>
+          <p className="ob-header-label">{current.label}</p>
           <h2 className="ob-header-question">{current.question}</h2>
         </div>
 
@@ -194,7 +190,7 @@ export default function Onboarding({ onClose, initialData }) {
 
         </div>
 
-        <div style={{ height: '20px' }}>
+        <div style={{ height: '16px', marginTop: '-4px' }}>
           <p className="ob-error" style={{ opacity: error ? 1 : 0, margin: 0 }}>{error}</p>
         </div>
 

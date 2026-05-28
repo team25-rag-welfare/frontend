@@ -65,8 +65,8 @@
   backdrop-filter: blur(16px);
   border-radius: 28px;
   padding: 42px 38px;
-  box-shadow: 0 8px 40px rgba(61,42,48,.14);
-  border: 1px solid rgba(255,255,255,0.65);
+  box-shadow: 0 6px 28px rgba(61,42,48,.09);
+  border: 1px solid rgba(242,199,199,.22);
   text-align: center;
 }
 
